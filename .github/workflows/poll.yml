@@ -1,3 +1,4 @@
+# Sets up the GitHub action to automatically poll for data every 5 minutes
 name: Disney Poller
 on:
   schedule:
