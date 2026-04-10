@@ -2,6 +2,7 @@ import requests
 import pandas as pd
 from datetime import datetime
 import os
+import pytz
 
 def pull_wait_times():
     # IDs for Disneyland (16) and Disney California Adventure (17)
@@ -17,12 +18,15 @@ def pull_wait_times():
         try:
             response = requests.get(url)
             data = response.json()
+
+            tz = pytz.timezone('America/Los_Angeles')
+            fetch_time = datetime.now(tz).strftime("%Y-%m-%d %H:%M:%S")
             
             for land in data.get('lands', []):
                 land_name = land.get('name')
                 for ride in land.get('rides', []):
                     all_rows.append({
-                        'fetch_timestamp': datetime.now().strftime("%Y-%m-%d %H:%M"),
+                        'fetch_timestamp': fetch_time,
                         'park_name': park_name,
                         'land': land_name,
                         'ride_id': ride.get('id'),
