@@ -1,9 +1,14 @@
 # Sets up the GitHub action to automatically poll for data every 5 minutes
 name: Disney Poller
 on:
-  schedule:
-    - cron: '*/6 * * * *'  # Runs every 5 minutes
+  # schedule:
+  #  - cron: '*/6 * * * *'  # Runs every 5 minutes
+  repository_dispatch:
+    types: [poll-disney]
   workflow_dispatch:        # Allows manual trigger
+
+permissions: 
+  contents: write
 
 jobs:
   build:
