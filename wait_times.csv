@@ -2379,3 +2379,88 @@ fetch_timestamp,park_name,land,ride_id,ride_name,wait_time,is_open,last_updated
 2026-04-10 17:40:26,Disney California Adventure,Pixar Pier,5557,Pixar Pal-A-Round – Non-Swinging,30,True,2026-04-11T00:35:43.000Z
 2026-04-10 17:40:26,Disney California Adventure,Pixar Pier,313,Toy Story Midway Mania!,0,False,2026-04-11T00:35:43.000Z
 2026-04-10 17:40:26,Disney California Adventure,San Fransokyo Square,13959,The Bakery Tour,0,True,2026-04-11T00:35:43.000Z
+2026-04-10 17:45:29,Disneyland,Adventureland,12428,Adventureland Treehouse inspired by Walt Disney’s Swiss Family Robinson,0,True,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disneyland,Adventureland,326,Indiana Jones™ Adventure,60,True,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disneyland,Adventureland,296,Jungle Cruise,0,False,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disneyland,Adventureland,288,Walt Disney's Enchanted Tiki Room,0,True,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disneyland,Bayou Country,304,Davy Crockett's Explorer Canoes,0,False,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disneyland,Bayou Country,306,The Many Adventures of Winnie the Pooh,20,True,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disneyland,Bayou Country,14168,Tiana's Bayou Adventure,60,True,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disneyland,Bayou Country,14326,Tiana's Bayou Adventure Single Rider,0,True,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disneyland,Fantasyland,307,"""it's a small world""",10,True,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disneyland,Fantasyland,285,Alice in Wonderland,35,True,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disneyland,Fantasyland,303,Casey Jr. Circus Train,15,True,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disneyland,Fantasyland,275,Dumbo the Flying Elephant,30,True,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disneyland,Fantasyland,277,King Arthur Carrousel,5,True,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disneyland,Fantasyland,278,Mad Tea Party,20,True,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disneyland,Fantasyland,279,Matterhorn Bobsleds,0,False,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disneyland,Fantasyland,6711,Meet Disney Princesses at Royal Hall,0,False,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disneyland,Fantasyland,280,Mr. Toad's Wild Ride,20,True,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disneyland,Fantasyland,281,Peter Pan's Flight,40,True,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disneyland,Fantasyland,282,Pinocchio's Daring Journey,15,True,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disneyland,Fantasyland,687,Sleeping Beauty Castle Walkthrough,0,False,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disneyland,Fantasyland,283,Snow White's Enchanted Wish,25,True,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disneyland,Fantasyland,305,Storybook Land Canal Boats,20,True,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disneyland,Frontierland,323,Big Thunder Mountain Railroad,85,True,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disneyland,Frontierland,679,Frontierland Shootin' Exposition,0,True,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disneyland,Frontierland,456,Mark Twain Riverboat,10,True,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disneyland,Frontierland,331,Pirate's Lair on Tom Sawyer Island,0,False,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disneyland,Frontierland,328,Sailing Ship Columbia,0,False,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disneyland,Main Street U.S.A,674,Disneyland Railroad,15,True,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disneyland,Main Street U.S.A,690,Great Moments with Mr. Lincoln,0,False,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disneyland,Main Street U.S.A,686,Main Street Cinema,0,True,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disneyland,Main Street U.S.A,691,Main Street Vehicles,0,True,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disneyland,Main Street U.S.A,14915,Opera House - Walt Disney - A Magical Life,0,True,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disneyland,Main Street U.S.A,695,The Disney Gallery,0,True,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disneyland,Main Street U.S.A,14923,Walt Disney - A Magical Life,0,True,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disneyland,Mickey's Toontown,324,Chip 'n' Dale's GADGETcoaster,30,True,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disneyland,Mickey's Toontown,13814,Donald's Duck Pond,0,True,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disneyland,Mickey's Toontown,11980,Goofy's How-to-Play Yard,0,True,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disneyland,Mickey's Toontown,11526,Mickey & Minnie's Runaway Railway,65,True,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disneyland,Mickey's Toontown,709,Mickey's House and Meet Mickey Mouse,30,True,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disneyland,Mickey's Toontown,327,Mickey's House and Meet Mickey Mouse,0,False,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disneyland,Mickey's Toontown,684,Minnie's House,0,True,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disneyland,Mickey's Toontown,332,Roger Rabbit's Car Toon Spin,0,False,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disneyland,New Orleans Square,13958,Haunted Mansion,40,True,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disneyland,New Orleans Square,289,Pirates of the Caribbean,40,True,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disneyland,Star Wars: Galaxy's Edge,6339,Millennium Falcon: Smugglers Run,55,True,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disneyland,Star Wars: Galaxy's Edge,10903,Millennium Falcon: Smugglers Run Single Rider,0,True,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disneyland,Star Wars: Galaxy's Edge,6340,Star Wars: Rise of the Resistance,80,True,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disneyland,Tomorrowland,287,Astro Orbitor,25,True,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disneyland,Tomorrowland,317,Autopia,20,True,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disneyland,Tomorrowland,273,Buzz Lightyear Astro Blasters,30,True,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disneyland,Tomorrowland,274,Disneyland Monorail,0,False,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disneyland,Tomorrowland,276,Finding Nemo Submarine Voyage,25,True,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disneyland,Tomorrowland,284,Space Mountain,85,True,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disneyland,Tomorrowland,286,Star Tours - The Adventures Continue,45,True,2026-04-11T00:40:49.000Z
+2026-04-10 17:45:29,Disney California Adventure,Avengers Campus,329,Guardians of the Galaxy - Mission: BREAKOUT!,120,True,2026-04-11T00:40:52.000Z
+2026-04-10 17:45:29,Disney California Adventure,Avengers Campus,8843,WEB SLINGERS: A Spider-Man Adventure,80,True,2026-04-11T00:40:52.000Z
+2026-04-10 17:45:29,Disney California Adventure,Avengers Campus,10907,WEB SLINGERS: A Spider-Man Adventure Single Rider,0,True,2026-04-11T00:40:52.000Z
+2026-04-10 17:45:29,Disney California Adventure,Cars Land,13961,Luigi's Rollickin' Roadsters,35,True,2026-04-11T00:40:52.000Z
+2026-04-10 17:45:29,Disney California Adventure,Cars Land,315,Mater's Junkyard Jamboree,30,True,2026-04-11T00:40:52.000Z
+2026-04-10 17:45:29,Disney California Adventure,Cars Land,295,Radiator Springs Racers,140,True,2026-04-11T00:40:52.000Z
+2026-04-10 17:45:29,Disney California Adventure,Cars Land,10904,Radiator Springs Racers Single Rider,0,True,2026-04-11T00:40:52.000Z
+2026-04-10 17:45:29,Disney California Adventure,Grizzly Peak,302,Grizzly River Run,45,True,2026-04-11T00:40:52.000Z
+2026-04-10 17:45:29,Disney California Adventure,Grizzly Peak,293,Redwood Creek Challenge Trail,5,True,2026-04-11T00:40:52.000Z
+2026-04-10 17:45:29,Disney California Adventure,Grizzly Peak,312,Soarin' Over California,45,True,2026-04-11T00:40:52.000Z
+2026-04-10 17:45:29,Disney California Adventure,Hollywood Land,321,Animation Academy,0,True,2026-04-11T00:40:52.000Z
+2026-04-10 17:45:29,Disney California Adventure,Hollywood Land,6440,Mickey's PhilharMagic,10,True,2026-04-11T00:40:52.000Z
+2026-04-10 17:45:29,Disney California Adventure,Hollywood Land,291,"Monsters, Inc. Mike & Sulley to the Rescue!",45,True,2026-04-11T00:40:52.000Z
+2026-04-10 17:45:29,Disney California Adventure,Hollywood Land,868,Sorcerer's Workshop,0,False,2026-04-11T00:40:52.000Z
+2026-04-10 17:45:29,Disney California Adventure,Hollywood Land,294,Turtle Talk with Crush,0,True,2026-04-11T00:40:52.000Z
+2026-04-10 17:45:29,Disney California Adventure,Paradise Gardens Park,298,Golden Zephyr,0,False,2026-04-11T00:40:52.000Z
+2026-04-10 17:45:29,Disney California Adventure,Paradise Gardens Park,319,Goofy's Sky School,50,True,2026-04-11T00:40:52.000Z
+2026-04-10 17:45:29,Disney California Adventure,Paradise Gardens Park,301,Silly Symphony Swings,25,True,2026-04-11T00:40:52.000Z
+2026-04-10 17:45:29,Disney California Adventure,Paradise Gardens Park,10905,Silly Symphony Swings Single Rider,0,True,2026-04-11T00:40:52.000Z
+2026-04-10 17:45:29,Disney California Adventure,Paradise Gardens Park,316,The Little Mermaid - Ariel's Undersea Adventure,40,True,2026-04-11T00:40:52.000Z
+2026-04-10 17:45:29,Disney California Adventure,Paradise Gardens Park,14742,World of Color Happiness!,0,True,2026-04-11T00:40:52.000Z
+2026-04-10 17:45:29,Disney California Adventure,Pixar Pier,13960,Games of Pixar Pier,0,True,2026-04-11T00:40:52.000Z
+2026-04-10 17:45:29,Disney California Adventure,Pixar Pier,322,Incredicoaster,55,True,2026-04-11T00:40:52.000Z
+2026-04-10 17:45:29,Disney California Adventure,Pixar Pier,10906,Incredicoaster Single Rider,0,True,2026-04-11T00:40:52.000Z
+2026-04-10 17:45:29,Disney California Adventure,Pixar Pier,6643,Inside Out Emotional Whirlwind,0,False,2026-04-11T00:40:52.000Z
+2026-04-10 17:45:29,Disney California Adventure,Pixar Pier,310,Jessie's Critter Carousel,15,True,2026-04-11T00:40:52.000Z
+2026-04-10 17:45:29,Disney California Adventure,Pixar Pier,300,Jumpin' Jellyfish,20,True,2026-04-11T00:40:52.000Z
+2026-04-10 17:45:29,Disney California Adventure,Pixar Pier,311,Pixar Pal-A-Round - Swinging,50,True,2026-04-11T00:40:52.000Z
+2026-04-10 17:45:29,Disney California Adventure,Pixar Pier,5557,Pixar Pal-A-Round – Non-Swinging,30,True,2026-04-11T00:40:52.000Z
+2026-04-10 17:45:29,Disney California Adventure,Pixar Pier,313,Toy Story Midway Mania!,0,False,2026-04-11T00:40:52.000Z
+2026-04-10 17:45:29,Disney California Adventure,San Fransokyo Square,13959,The Bakery Tour,0,True,2026-04-11T00:40:52.000Z
