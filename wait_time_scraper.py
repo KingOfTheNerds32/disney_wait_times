@@ -5,11 +5,11 @@ import os
 import pytz
 
 def pull_wait_times():
-    # Disneyland (16), DCA (17), and Universal Studios Hollywood (13)
+    # Disneyland (16), DCA (17), and Universal Studios Hollywood (66)
     parks = {
         16: "Disneyland",
         17: "Disney California Adventure",
-        13: "Universal Studios Hollywood"
+        66: "Universal Studios Hollywood"
     }
     
     all_rows = []
