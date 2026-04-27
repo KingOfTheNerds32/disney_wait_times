@@ -1,22 +1,25 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Theme Park Wait Time Dashboard</title>
+    <title>7-Day Rolling Average Wait Times</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { font-family: sans-serif; margin: 20px; background: #f4f4f9; }
-        .controls { margin-bottom: 20px; display: flex; gap: 10px; }
-        .container { background: white; padding: 20px; border-radius: 8px; shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        body { font-family: -apple-system, sans-serif; margin: 20px; background: #f8f9fa; color: #333; }
+        .controls { margin-bottom: 20px; display: flex; gap: 15px; align-items: center; }
+        select { padding: 8px; border-radius: 6px; border: 1px solid #ccc; }
+        .container { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        h2 { margin-top: 0; }
     </style>
 </head>
 <body>
 
-    <h2>🎢 Ride Wait Time Trends</h2>
+    <h2>📊 7-Day Average Wait Times</h2>
+    <p>Displays the average wait time for each 5-minute increment over the last week.</p>
     
     <div class="controls">
-        <select id="parkFilter" onchange="updateLandOptions()"></select>
-        <select id="landFilter" onchange="renderChart()"></select>
+        <label>Park:</label> <select id="parkFilter" onchange="updateLandOptions()"></select>
+        <label>Land:</label> <select id="landFilter" onchange="renderChart()"></select>
     </div>
 
     <div class="container">
@@ -27,18 +30,19 @@
         let globalData = [];
         let chartInstance = null;
 
-        // 1. Fetch and Parse the CSV
         Papa.parse("wait_times.csv", {
             download: true,
             header: true,
+            skipEmptyLines: true,
             complete: function(results) {
                 globalData = results.data;
-                populateParkOptions();
+                processInitialData();
             }
         });
 
-        function populateParkOptions() {
-            const parks = [...new Set(globalData.map(item => item.park_name))].filter(Boolean);
+        function processInitialData() {
+            // Populate Park Dropdown
+            const parks = [...new Set(globalData.map(i => i.park_name))].filter(Boolean);
             const parkSelect = document.getElementById('parkFilter');
             parks.forEach(park => {
                 let opt = document.createElement('option');
@@ -65,22 +69,45 @@
             const park = document.getElementById('parkFilter').value;
             const land = document.getElementById('landFilter').value;
 
-            const filtered = globalData.filter(i => i.park_name === park && i.land === land);
-            
-            // Group data by ride name
-            const rides = [...new Set(filtered.map(i => i.ride_name))];
-            const timestamps = [...new Set(filtered.map(i => i.fetch_timestamp))].sort();
+            // 1. Filter for the selected Park/Land and only the last 7 days
+            const now = new Date();
+            const sevenDaysAgo = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
 
-            const datasets = rides.map((ride, index) => {
+            const filtered = globalData.filter(i => {
+                const itemDate = new Date(i.fetch_timestamp);
+                return i.park_name === park && i.land === land && itemDate >= sevenDaysAgo;
+            });
+
+            // 2. Group by Time of Day (HH:mm) and Ride Name
+            const timeBuckets = {}; // { "10:05": { "Ride A": [wait1, wait2], "Ride B": [...] } }
+            const ridesSet = new Set();
+
+            filtered.forEach(row => {
+                const timeStr = row.fetch_timestamp.split(' ')[1].substring(0, 5); // Gets HH:mm
+                const ride = row.ride_name;
+                const wait = parseInt(row.wait_time);
+
+                ridesSet.add(ride);
+                if (!timeBuckets[timeStr]) timeBuckets[timeStr] = {};
+                if (!timeBuckets[timeStr][ride]) timeBuckets[timeStr][ride] = [];
+                timeBuckets[timeStr][ride].push(wait);
+            });
+
+            // 3. Calculate Averages
+            const sortedTimes = Object.keys(timeBuckets).sort();
+            const datasets = Array.from(ridesSet).map((ride, index) => {
                 return {
                     label: ride,
-                    data: timestamps.map(ts => {
-                        const match = filtered.find(i => i.ride_name === ride && i.fetch_timestamp === ts);
-                        return match ? match.wait_time : null;
+                    data: sortedTimes.map(t => {
+                        const vals = timeBuckets[t][ride];
+                        if (!vals) return null;
+                        return vals.reduce((a, b) => a + b, 0) / vals.length;
                     }),
-                    borderColor: `hsl(${index * 137.5}, 70%, 50%)`, // Unique colors
-                    fill: false,
-                    tension: 0.1
+                    borderColor: `hsl(${index * 137.5}, 70%, 50%)`,
+                    backgroundColor: `hsla(${index * 137.5}, 70%, 50%, 0.1)`,
+                    borderWidth: 2,
+                    pointRadius: 0, // Cleaner look for rolling averages
+                    tension: 0.3
                 };
             });
 
@@ -89,10 +116,17 @@
             const ctx = document.getElementById('waitChart').getContext('2d');
             chartInstance = new Chart(ctx, {
                 type: 'line',
-                data: { labels: timestamps, datasets: datasets },
+                data: { labels: sortedTimes, datasets: datasets },
                 options: {
                     responsive: true,
-                    scales: { y: { beginAtZero: true, title: { display: true, text: 'Wait Time (min)' } } }
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: { mode: 'index', intersect: false }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, title: { display: true, text: 'Avg Wait (Min)' } },
+                        x: { title: { display: true, text: 'Time of Day' } }
+                    }
                 }
             });
         }
