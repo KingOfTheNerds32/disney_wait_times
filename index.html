@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Theme Park Wait Time Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: sans-serif; margin: 20px; background: #f4f4f9; }
+        .controls { margin-bottom: 20px; display: flex; gap: 10px; }
+        .container { background: white; padding: 20px; border-radius: 8px; shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+
+    <h2>🎢 Ride Wait Time Trends</h2>
+    
+    <div class="controls">
+        <select id="parkFilter" onchange="updateLandOptions()"></select>
+        <select id="landFilter" onchange="renderChart()"></select>
+    </div>
+
+    <div class="container">
+        <canvas id="waitChart"></canvas>
+    </div>
+
+    <script>
+        let globalData = [];
+        let chartInstance = null;
+
+        // 1. Fetch and Parse the CSV
+        Papa.parse("wait_times.csv", {
+            download: true,
+            header: true,
+            complete: function(results) {
+                globalData = results.data;
+                populateParkOptions();
+            }
+        });
+
+        function populateParkOptions() {
+            const parks = [...new Set(globalData.map(item => item.park_name))].filter(Boolean);
+            const parkSelect = document.getElementById('parkFilter');
+            parks.forEach(park => {
+                let opt = document.createElement('option');
+                opt.value = opt.innerText = park;
+                parkSelect.appendChild(opt);
+            });
+            updateLandOptions();
+        }
+
+        function updateLandOptions() {
+            const selectedPark = document.getElementById('parkFilter').value;
+            const lands = [...new Set(globalData.filter(i => i.park_name === selectedPark).map(i => i.land))].filter(Boolean);
+            const landSelect = document.getElementById('landFilter');
+            landSelect.innerHTML = '';
+            lands.forEach(land => {
+                let opt = document.createElement('option');
+                opt.value = opt.innerText = land;
+                landSelect.appendChild(opt);
+            });
+            renderChart();
+        }
+
+        function renderChart() {
+            const park = document.getElementById('parkFilter').value;
+            const land = document.getElementById('landFilter').value;
+
+            const filtered = globalData.filter(i => i.park_name === park && i.land === land);
+            
+            // Group data by ride name
+            const rides = [...new Set(filtered.map(i => i.ride_name))];
+            const timestamps = [...new Set(filtered.map(i => i.fetch_timestamp))].sort();
+
+            const datasets = rides.map((ride, index) => {
+                return {
+                    label: ride,
+                    data: timestamps.map(ts => {
+                        const match = filtered.find(i => i.ride_name === ride && i.fetch_timestamp === ts);
+                        return match ? match.wait_time : null;
+                    }),
+                    borderColor: `hsl(${index * 137.5}, 70%, 50%)`, // Unique colors
+                    fill: false,
+                    tension: 0.1
+                };
+            });
+
+            if (chartInstance) chartInstance.destroy();
+
+            const ctx = document.getElementById('waitChart').getContext('2d');
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: { labels: timestamps, datasets: datasets },
+                options: {
+                    responsive: true,
+                    scales: { y: { beginAtZero: true, title: { display: true, text: 'Wait Time (min)' } } }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
