@@ -16,7 +16,6 @@
 <body>
 
     <h2>📊 7-Day Average Wait Times</h2>
-    <p>Displays the average wait time for each 5-minute increment over the last week.</p>
     
     <div class="controls">
         <label>Park:</label> 
@@ -36,7 +35,6 @@
         let globalData = [];
         let chartInstance = null;
 
-        // 1. Fetch and Parse the CSV
         Papa.parse("wait_times.csv", {
             download: true,
             header: true,
@@ -48,7 +46,10 @@
         });
 
         function processInitialData() {
-            const parks = [...new Set(globalData.map(i => i.park_name))].filter(Boolean);
+            // Get unique parks and clean up any numeric junk
+            const parks = [...new Set(globalData.map(i => i.park_name))]
+                            .filter(p => p && isNaN(p));
+            
             const parkSelect = document.getElementById('parkFilter');
             parks.forEach(park => {
                 let opt = document.createElement('option');
@@ -63,8 +64,8 @@
             const landWrapper = document.getElementById('landWrapper');
             const landSelect = document.getElementById('landFilter');
             
-            // Universal Studios Hollywood logic: Hide Land filter
-            if (selectedPark === "Universal Studios Hollywood") {
+            // Logic for Universal Studios Hollywood
+            if (selectedPark.includes("Universal")) {
                 landWrapper.style.display = "none";
                 landSelect.innerHTML = '<option value="ALL">All Lands</option>';
             } else {
@@ -87,30 +88,34 @@
             const now = new Date();
             const sevenDaysAgo = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
 
-            // 2. Filter logic
             const filtered = globalData.filter(i => {
                 const itemDate = new Date(i.fetch_timestamp);
                 const isCorrectPark = i.park_name === park;
+                
+                // If Universal, we ignore land filtering
                 const isCorrectLand = (land === "ALL" || i.land === land);
                 const isWithinWeek = itemDate >= sevenDaysAgo;
                 
-                // Filter out Halloween Horror Nights or specific Halloween lands
-                const isHalloween = i.land && i.land.toLowerCase().includes("halloween");
+                // Exclude Halloween content
+                const landStr = (i.land || "").toLowerCase();
+                const rideStr = (i.ride_name || "").toLowerCase();
+                const isHalloween = landStr.includes("halloween") || rideStr.includes("halloween");
                 
                 return isCorrectPark && isCorrectLand && isWithinWeek && !isHalloween;
             });
 
-            // 3. Clean Ride Names (Fixing the legend issue in image_116833.png)
             const timeBuckets = {}; 
             const ridesSet = new Set();
 
             filtered.forEach(row => {
                 const ride = row.ride_name;
-                
-                // SANITIZATION: Skip rows where ride_name is just a number or missing
-                if (!ride || !isNaN(ride)) return;
+                // Double check sanitization for legend
+                if (!ride || !isNaN(ride) || ride.length < 2) return;
 
-                const timeStr = row.fetch_timestamp.split(' ')[1].substring(0, 5); 
+                const timeParts = row.fetch_timestamp.split(' ');
+                if (timeParts.length < 2) return;
+                
+                const timeStr = timeParts[1].substring(0, 5); 
                 const wait = parseInt(row.wait_time);
 
                 ridesSet.add(ride);
@@ -126,7 +131,8 @@
                     data: sortedTimes.map(t => {
                         const vals = timeBuckets[t][ride];
                         if (!vals) return null;
-                        return vals.reduce((a, b) => a + b, 0) / vals.length;
+                        const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
+                        return Math.round(avg); // Round for cleaner tooltips
                     }),
                     borderColor: `hsl(${index * 137.5}, 70%, 50%)`,
                     backgroundColor: `hsla(${index * 137.5}, 70%, 50%, 0.1)`,
@@ -144,8 +150,9 @@
                 data: { labels: sortedTimes, datasets: datasets },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
                     plugins: {
-                        legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15 } },
+                        legend: { position: 'bottom', labels: { boxWidth: 10, padding: 10, font: { size: 10 } } },
                         tooltip: { mode: 'index', intersect: false }
                     },
                     scales: {
