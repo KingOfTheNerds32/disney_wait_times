@@ -1,25 +1,27 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>7-Day Average Wait Times</title>
+    <title>Park Telemetry Dashboard</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { font-family: -apple-system, sans-serif; margin: 20px; background: #f8f9fa; color: #333; }
-        .controls { margin-bottom: 20px; display: flex; gap: 15px; align-items: center; }
-        select { padding: 8px; border-radius: 6px; border: 1px solid #ccc; min-width: 150px; }
-        .container { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        h2 { margin-top: 0; }
-        #landWrapper { display: inline-block; }
+        body { font-family: -apple-system, sans-serif; margin: 0; padding: 20px; background: #f8f9fa; height: 100vh; display: flex; flex-direction: column; }
+        .controls { margin-bottom: 20px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
+        select { padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 14px; background: white; cursor: pointer; }
+        /* This ensures the chart stays big and readable */
+        .chart-container { flex-grow: 1; position: relative; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); min-height: 500px; }
+        h2 { margin: 0 0 10px 0; font-size: 22px; }
     </style>
 </head>
 <body>
 
-    <h2>📊 7-Day Average Wait Times</h2>
+    <h2>📊 7-Day Wait Time Averages</h2>
     
     <div class="controls">
-        <label>Park:</label> 
-        <select id="parkFilter" onchange="updateLandOptions()"></select>
+        <div>
+            <label>Park:</label> 
+            <select id="parkFilter" onchange="updateLandOptions()"></select>
+        </div>
         
         <div id="landWrapper">
             <label>Land:</label> 
@@ -27,7 +29,7 @@
         </div>
     </div>
 
-    <div class="container">
+    <div class="chart-container">
         <canvas id="waitChart"></canvas>
     </div>
 
@@ -41,16 +43,18 @@
             skipEmptyLines: true,
             complete: function(results) {
                 globalData = results.data;
+                console.log("Unique Parks in CSV:", [...new Set(globalData.map(i => i.park_name))]);
                 processInitialData();
             }
         });
 
         function processInitialData() {
-            // Get unique parks and clean up any numeric junk
+            // Filter out junk/numbers and get unique names
             const parks = [...new Set(globalData.map(i => i.park_name))]
-                            .filter(p => p && isNaN(p));
+                            .filter(p => p && isNaN(p) && p.length > 2);
             
             const parkSelect = document.getElementById('parkFilter');
+            parkSelect.innerHTML = '';
             parks.forEach(park => {
                 let opt = document.createElement('option');
                 opt.value = opt.innerText = park;
@@ -64,8 +68,8 @@
             const landWrapper = document.getElementById('landWrapper');
             const landSelect = document.getElementById('landFilter');
             
-            // Logic for Universal Studios Hollywood
-            if (selectedPark.includes("Universal")) {
+            // Fuzzy search for Universal to handle any naming variations
+            if (selectedPark.toLowerCase().includes("universal")) {
                 landWrapper.style.display = "none";
                 landSelect.innerHTML = '<option value="ALL">All Lands</option>';
             } else {
@@ -91,15 +95,12 @@
             const filtered = globalData.filter(i => {
                 const itemDate = new Date(i.fetch_timestamp);
                 const isCorrectPark = i.park_name === park;
-                
-                // If Universal, we ignore land filtering
                 const isCorrectLand = (land === "ALL" || i.land === land);
                 const isWithinWeek = itemDate >= sevenDaysAgo;
                 
-                // Exclude Halloween content
+                // Keep the Halloween filter surgical
                 const landStr = (i.land || "").toLowerCase();
-                const rideStr = (i.ride_name || "").toLowerCase();
-                const isHalloween = landStr.includes("halloween") || rideStr.includes("halloween");
+                const isHalloween = landStr.includes("halloween");
                 
                 return isCorrectPark && isCorrectLand && isWithinWeek && !isHalloween;
             });
@@ -109,10 +110,10 @@
 
             filtered.forEach(row => {
                 const ride = row.ride_name;
-                // Double check sanitization for legend
-                if (!ride || !isNaN(ride) || ride.length < 2) return;
+                // STAGE 1: Skip if ride is a number or missing (Fix for image_116833.png)
+                if (!ride || !isNaN(ride) || ride.length < 3) return;
 
-                const timeParts = row.fetch_timestamp.split(' ');
+                const timeParts = (row.fetch_timestamp || "").split(' ');
                 if (timeParts.length < 2) return;
                 
                 const timeStr = timeParts[1].substring(0, 5); 
@@ -126,19 +127,19 @@
 
             const sortedTimes = Object.keys(timeBuckets).sort();
             const datasets = Array.from(ridesSet).map((ride, index) => {
+                const hue = (index * 137.5) % 360; 
                 return {
                     label: ride,
                     data: sortedTimes.map(t => {
                         const vals = timeBuckets[t][ride];
-                        if (!vals) return null;
-                        const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
-                        return Math.round(avg); // Round for cleaner tooltips
+                        if (!vals || vals.length === 0) return null;
+                        return Math.round(vals.reduce((a, b) => a + b, 0) / vals.length);
                     }),
-                    borderColor: `hsl(${index * 137.5}, 70%, 50%)`,
-                    backgroundColor: `hsla(${index * 137.5}, 70%, 50%, 0.1)`,
-                    borderWidth: 2,
+                    borderColor: `hsl(${hue}, 70%, 45%)`,
+                    backgroundColor: `hsla(${hue}, 70%, 45%, 0.1)`,
+                    borderWidth: 2.5,
                     pointRadius: 0, 
-                    tension: 0.3
+                    tension: 0.4
                 };
             });
 
@@ -150,14 +151,17 @@
                 data: { labels: sortedTimes, datasets: datasets },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false,
+                    maintainAspectRatio: false, // CRITICAL: This plus CSS fixes the "squish"
+                    interaction: { mode: 'index', intersect: false },
                     plugins: {
-                        legend: { position: 'bottom', labels: { boxWidth: 10, padding: 10, font: { size: 10 } } },
-                        tooltip: { mode: 'index', intersect: false }
+                        legend: { 
+                            position: 'bottom', 
+                            labels: { boxWidth: 12, padding: 15, font: { size: 11 } } 
+                        }
                     },
                     scales: {
-                        y: { beginAtZero: true, title: { display: true, text: 'Avg Wait (Min)' } },
-                        x: { title: { display: true, text: 'Time of Day' } }
+                        y: { beginAtZero: true, title: { display: true, text: 'Avg Minutes' } },
+                        x: { grid: { display: false } }
                     }
                 }
             });
