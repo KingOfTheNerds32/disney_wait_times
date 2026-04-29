@@ -40,25 +40,30 @@
         // 1. Load the CSV
         Papa.parse("wait_times.csv", {
             download: true,
-            header: false, // Reading raw because CSV sometimes lacks consistent headers
+            header: true, // Set to true so the first row is ignored as data
             skipEmptyLines: true,
             complete: function(results) {
-                // Mapping the CSV structure provided in your example
-                globalData = results.data.map(row => ({
-                    fetch_timestamp: row[0],
-                    park_name: row[1],
-                    land: row[2],
-                    ride_name: row[3],
-                    wait_time: row[4],
-                    is_open: row[5]
-                }));
+                // Map the data to ensure we are using the correct keys regardless of CSV header naming
+                globalData = results.data.map(row => {
+                    // This handles cases where headers might have spaces or different casing
+                    const keys = Object.keys(row);
+                    return {
+                        fetch_timestamp: row[keys[0]],
+                        park_name: row[keys[1]],
+                        land: row[keys[2]],
+                        ride_name: row[keys[3]],
+                        wait_time: row[keys[4]],
+                        is_open: row[keys[5]]
+                    };
+                });
                 initDashboard();
             }
         });
 
         function initDashboard() {
+            // Get unique parks and filter out any header artifacts or junk
             const parks = [...new Set(globalData.map(i => i.park_name))]
-                            .filter(p => p && isNaN(p) && p.length > 2);
+                            .filter(p => p && p !== "park_name" && isNaN(p) && p.length > 2);
             
             const parkSelect = document.getElementById('parkFilter');
             parkSelect.innerHTML = '';
@@ -75,13 +80,14 @@
             const landWrapper = document.getElementById('landWrapper');
             const landSelect = document.getElementById('landFilter');
             
+            // Universal Studios Hollywood (ID 66) logic
             if (selectedPark === "Universal Studios Hollywood") {
                 landWrapper.style.display = "none";
                 landSelect.innerHTML = '<option value="ALL">All Rides</option>';
             } else {
                 landWrapper.style.display = "inline-block";
                 const lands = [...new Set(globalData.filter(i => i.park_name === selectedPark).map(i => i.land))]
-                                .filter(l => l && l.trim() !== "" && !l.toLowerCase().includes("halloween"));
+                                .filter(l => l && l !== "land" && l.trim() !== "" && !l.toLowerCase().includes("halloween"));
                 
                 landSelect.innerHTML = '';
                 lands.forEach(land => {
@@ -101,14 +107,17 @@
             const sevenDaysAgo = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
 
             const filtered = globalData.filter(i => {
-                const itemDate = new Date(i.fetch_timestamp);
+                const ts = i.fetch_timestamp;
+                if (!ts || ts === "fetch_timestamp") return false;
+                
+                const itemDate = new Date(ts);
                 const isCorrectPark = i.park_name === park;
                 const isWithinWeek = itemDate >= sevenDaysAgo;
                 
                 const isUniversal = park === "Universal Studios Hollywood";
                 const isCorrectLand = isUniversal || (land === "ALL" || i.land === land);
 
-                // Strict Halloween Exclusion
+                // Filter out Halloween
                 const landStr = (i.land || "").toLowerCase();
                 const rideStr = (i.ride_name || "").toLowerCase();
                 const isHalloween = landStr === "halloween" || rideStr.includes("halloween");
@@ -123,8 +132,8 @@
                 const ride = row.ride_name;
                 const ts = row.fetch_timestamp;
                 
-                // Clean the legend: Skip numbers, empty strings, or very short names
-                if (!ride || !isNaN(ride) || ride.length < 3) return;
+                // Final check to avoid numbers in legend
+                if (!ride || ride === "ride_name" || !isNaN(ride) || ride.length < 3) return;
 
                 const timeMatch = ts.match(/(\d{2}:\d{2})/);
                 if (!timeMatch) return;
