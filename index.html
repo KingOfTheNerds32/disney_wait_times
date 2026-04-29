@@ -5,17 +5,17 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { font-family: -apple-system, sans-serif; margin: 0; padding: 20px; background: #f8f9fa; height: 100vh; display: flex; flex-direction: column; }
-        .controls { margin-bottom: 20px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
-        select { padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 14px; background: white; cursor: pointer; }
-        /* This ensures the chart stays big and readable */
-        .chart-container { flex-grow: 1; position: relative; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); min-height: 500px; }
-        h2 { margin: 0 0 10px 0; font-size: 22px; }
+        body { font-family: -apple-system, sans-serif; margin: 0; padding: 20px; background: #f8f9fa; display: flex; flex-direction: column; min-height: 100vh; }
+        .controls { margin-bottom: 20px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap; background: #fff; padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        select { padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 14px; background: white; cursor: pointer; min-width: 200px; }
+        .chart-container { flex-grow: 1; position: relative; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); min-height: 600px; }
+        h2 { margin: 0 0 10px 0; font-size: 22px; color: #2c3e50; }
+        label { font-weight: bold; color: #666; }
     </style>
 </head>
 <body>
 
-    <h2>📊 7-Day Wait Time Averages</h2>
+    <h2>📊 Theme Park 7-Day Wait Averages</h2>
     
     <div class="controls">
         <div>
@@ -37,19 +37,26 @@
         let globalData = [];
         let chartInstance = null;
 
+        // 1. Load the CSV
         Papa.parse("wait_times.csv", {
             download: true,
-            header: true,
+            header: false, // Reading raw because CSV sometimes lacks consistent headers
             skipEmptyLines: true,
             complete: function(results) {
-                globalData = results.data;
-                console.log("Unique Parks in CSV:", [...new Set(globalData.map(i => i.park_name))]);
-                processInitialData();
+                // Mapping the CSV structure provided in your example
+                globalData = results.data.map(row => ({
+                    fetch_timestamp: row[0],
+                    park_name: row[1],
+                    land: row[2],
+                    ride_name: row[3],
+                    wait_time: row[4],
+                    is_open: row[5]
+                }));
+                initDashboard();
             }
         });
 
-        function processInitialData() {
-            // Filter out junk/numbers and get unique names
+        function initDashboard() {
             const parks = [...new Set(globalData.map(i => i.park_name))]
                             .filter(p => p && isNaN(p) && p.length > 2);
             
@@ -68,13 +75,14 @@
             const landWrapper = document.getElementById('landWrapper');
             const landSelect = document.getElementById('landFilter');
             
-            // Fuzzy search for Universal to handle any naming variations
-            if (selectedPark.toLowerCase().includes("universal")) {
+            if (selectedPark === "Universal Studios Hollywood") {
                 landWrapper.style.display = "none";
-                landSelect.innerHTML = '<option value="ALL">All Lands</option>';
+                landSelect.innerHTML = '<option value="ALL">All Rides</option>';
             } else {
                 landWrapper.style.display = "inline-block";
-                const lands = [...new Set(globalData.filter(i => i.park_name === selectedPark).map(i => i.land))].filter(Boolean);
+                const lands = [...new Set(globalData.filter(i => i.park_name === selectedPark).map(i => i.land))]
+                                .filter(l => l && l.trim() !== "" && !l.toLowerCase().includes("halloween"));
+                
                 landSelect.innerHTML = '';
                 lands.forEach(land => {
                     let opt = document.createElement('option');
@@ -95,14 +103,17 @@
             const filtered = globalData.filter(i => {
                 const itemDate = new Date(i.fetch_timestamp);
                 const isCorrectPark = i.park_name === park;
-                const isCorrectLand = (land === "ALL" || i.land === land);
                 const isWithinWeek = itemDate >= sevenDaysAgo;
                 
-                // Keep the Halloween filter surgical
+                const isUniversal = park === "Universal Studios Hollywood";
+                const isCorrectLand = isUniversal || (land === "ALL" || i.land === land);
+
+                // Strict Halloween Exclusion
                 const landStr = (i.land || "").toLowerCase();
-                const isHalloween = landStr.includes("halloween");
-                
-                return isCorrectPark && isCorrectLand && isWithinWeek && !isHalloween;
+                const rideStr = (i.ride_name || "").toLowerCase();
+                const isHalloween = landStr === "halloween" || rideStr.includes("halloween");
+
+                return isCorrectPark && isWithinWeek && isCorrectLand && !isHalloween;
             });
 
             const timeBuckets = {}; 
@@ -110,14 +121,17 @@
 
             filtered.forEach(row => {
                 const ride = row.ride_name;
-                // STAGE 1: Skip if ride is a number or missing (Fix for image_116833.png)
+                const ts = row.fetch_timestamp;
+                
+                // Clean the legend: Skip numbers, empty strings, or very short names
                 if (!ride || !isNaN(ride) || ride.length < 3) return;
 
-                const timeParts = (row.fetch_timestamp || "").split(' ');
-                if (timeParts.length < 2) return;
+                const timeMatch = ts.match(/(\d{2}:\d{2})/);
+                if (!timeMatch) return;
+                const timeStr = timeMatch[0];
                 
-                const timeStr = timeParts[1].substring(0, 5); 
                 const wait = parseInt(row.wait_time);
+                if (isNaN(wait)) return;
 
                 ridesSet.add(ride);
                 if (!timeBuckets[timeStr]) timeBuckets[timeStr] = {};
@@ -132,14 +146,15 @@
                     label: ride,
                     data: sortedTimes.map(t => {
                         const vals = timeBuckets[t][ride];
-                        if (!vals || vals.length === 0) return null;
-                        return Math.round(vals.reduce((a, b) => a + b, 0) / vals.length);
+                        if (!vals) return null;
+                        const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
+                        return Math.round(avg);
                     }),
                     borderColor: `hsl(${hue}, 70%, 45%)`,
                     backgroundColor: `hsla(${hue}, 70%, 45%, 0.1)`,
-                    borderWidth: 2.5,
+                    borderWidth: 2,
                     pointRadius: 0, 
-                    tension: 0.4
+                    tension: 0.3
                 };
             });
 
@@ -151,17 +166,17 @@
                 data: { labels: sortedTimes, datasets: datasets },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false, // CRITICAL: This plus CSS fixes the "squish"
+                    maintainAspectRatio: false,
                     interaction: { mode: 'index', intersect: false },
                     plugins: {
                         legend: { 
                             position: 'bottom', 
-                            labels: { boxWidth: 12, padding: 15, font: { size: 11 } } 
+                            labels: { boxWidth: 10, padding: 8, font: { size: 10 } } 
                         }
                     },
                     scales: {
                         y: { beginAtZero: true, title: { display: true, text: 'Avg Minutes' } },
-                        x: { grid: { display: false } }
+                        x: { ticks: { maxTicksLimit: 24 } }
                     }
                 }
             });
