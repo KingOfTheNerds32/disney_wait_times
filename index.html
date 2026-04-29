@@ -1,15 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>7-Day Rolling Average Wait Times</title>
+    <title>7-Day Average Wait Times</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { font-family: -apple-system, sans-serif; margin: 20px; background: #f8f9fa; color: #333; }
         .controls { margin-bottom: 20px; display: flex; gap: 15px; align-items: center; }
-        select { padding: 8px; border-radius: 6px; border: 1px solid #ccc; }
+        select { padding: 8px; border-radius: 6px; border: 1px solid #ccc; min-width: 150px; }
         .container { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         h2 { margin-top: 0; }
+        #landWrapper { display: inline-block; }
     </style>
 </head>
 <body>
@@ -18,8 +19,13 @@
     <p>Displays the average wait time for each 5-minute increment over the last week.</p>
     
     <div class="controls">
-        <label>Park:</label> <select id="parkFilter" onchange="updateLandOptions()"></select>
-        <label>Land:</label> <select id="landFilter" onchange="renderChart()"></select>
+        <label>Park:</label> 
+        <select id="parkFilter" onchange="updateLandOptions()"></select>
+        
+        <div id="landWrapper">
+            <label>Land:</label> 
+            <select id="landFilter" onchange="renderChart()"></select>
+        </div>
     </div>
 
     <div class="container">
@@ -30,6 +36,7 @@
         let globalData = [];
         let chartInstance = null;
 
+        // 1. Fetch and Parse the CSV
         Papa.parse("wait_times.csv", {
             download: true,
             header: true,
@@ -41,7 +48,6 @@
         });
 
         function processInitialData() {
-            // Populate Park Dropdown
             const parks = [...new Set(globalData.map(i => i.park_name))].filter(Boolean);
             const parkSelect = document.getElementById('parkFilter');
             parks.forEach(park => {
@@ -54,14 +60,23 @@
 
         function updateLandOptions() {
             const selectedPark = document.getElementById('parkFilter').value;
-            const lands = [...new Set(globalData.filter(i => i.park_name === selectedPark).map(i => i.land))].filter(Boolean);
+            const landWrapper = document.getElementById('landWrapper');
             const landSelect = document.getElementById('landFilter');
-            landSelect.innerHTML = '';
-            lands.forEach(land => {
-                let opt = document.createElement('option');
-                opt.value = opt.innerText = land;
-                landSelect.appendChild(opt);
-            });
+            
+            // Universal Studios Hollywood logic: Hide Land filter
+            if (selectedPark === "Universal Studios Hollywood") {
+                landWrapper.style.display = "none";
+                landSelect.innerHTML = '<option value="ALL">All Lands</option>';
+            } else {
+                landWrapper.style.display = "inline-block";
+                const lands = [...new Set(globalData.filter(i => i.park_name === selectedPark).map(i => i.land))].filter(Boolean);
+                landSelect.innerHTML = '';
+                lands.forEach(land => {
+                    let opt = document.createElement('option');
+                    opt.value = opt.innerText = land;
+                    landSelect.appendChild(opt);
+                });
+            }
             renderChart();
         }
 
@@ -69,22 +84,33 @@
             const park = document.getElementById('parkFilter').value;
             const land = document.getElementById('landFilter').value;
 
-            // 1. Filter for the selected Park/Land and only the last 7 days
             const now = new Date();
             const sevenDaysAgo = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
 
+            // 2. Filter logic
             const filtered = globalData.filter(i => {
                 const itemDate = new Date(i.fetch_timestamp);
-                return i.park_name === park && i.land === land && itemDate >= sevenDaysAgo;
+                const isCorrectPark = i.park_name === park;
+                const isCorrectLand = (land === "ALL" || i.land === land);
+                const isWithinWeek = itemDate >= sevenDaysAgo;
+                
+                // Filter out Halloween Horror Nights or specific Halloween lands
+                const isHalloween = i.land && i.land.toLowerCase().includes("halloween");
+                
+                return isCorrectPark && isCorrectLand && isWithinWeek && !isHalloween;
             });
 
-            // 2. Group by Time of Day (HH:mm) and Ride Name
-            const timeBuckets = {}; // { "10:05": { "Ride A": [wait1, wait2], "Ride B": [...] } }
+            // 3. Clean Ride Names (Fixing the legend issue in image_116833.png)
+            const timeBuckets = {}; 
             const ridesSet = new Set();
 
             filtered.forEach(row => {
-                const timeStr = row.fetch_timestamp.split(' ')[1].substring(0, 5); // Gets HH:mm
                 const ride = row.ride_name;
+                
+                // SANITIZATION: Skip rows where ride_name is just a number or missing
+                if (!ride || !isNaN(ride)) return;
+
+                const timeStr = row.fetch_timestamp.split(' ')[1].substring(0, 5); 
                 const wait = parseInt(row.wait_time);
 
                 ridesSet.add(ride);
@@ -93,7 +119,6 @@
                 timeBuckets[timeStr][ride].push(wait);
             });
 
-            // 3. Calculate Averages
             const sortedTimes = Object.keys(timeBuckets).sort();
             const datasets = Array.from(ridesSet).map((ride, index) => {
                 return {
@@ -106,7 +131,7 @@
                     borderColor: `hsl(${index * 137.5}, 70%, 50%)`,
                     backgroundColor: `hsla(${index * 137.5}, 70%, 50%, 0.1)`,
                     borderWidth: 2,
-                    pointRadius: 0, // Cleaner look for rolling averages
+                    pointRadius: 0, 
                     tension: 0.3
                 };
             });
@@ -120,7 +145,7 @@
                 options: {
                     responsive: true,
                     plugins: {
-                        legend: { position: 'bottom' },
+                        legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15 } },
                         tooltip: { mode: 'index', intersect: false }
                     },
                     scales: {
