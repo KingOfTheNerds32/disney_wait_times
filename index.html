@@ -1,195 +1,302 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Park Telemetry Dashboard</title>
+    <title>Theme Park Intelligence Hub</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { font-family: -apple-system, sans-serif; margin: 0; padding: 20px; background: #f8f9fa; display: flex; flex-direction: column; min-height: 100vh; }
-        .controls { margin-bottom: 20px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap; background: #fff; padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        select { padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 14px; background: white; cursor: pointer; min-width: 200px; }
-        .chart-container { flex-grow: 1; position: relative; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); min-height: 600px; }
-        h2 { margin: 0 0 10px 0; font-size: 22px; color: #2c3e50; }
-        label { font-weight: bold; color: #666; }
+        :root { --primary: #2c3e50; --accent: #3498db; --bg: #f4f7f6; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: var(--bg); display: flex; flex-direction: column; height: 100vh; }
+        header { background: var(--primary); color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .tabs { display: flex; background: #ddd; padding: 0 2rem; border-bottom: 2px solid #ccc; }
+        .tab { padding: 12px 24px; cursor: pointer; border: none; background: none; font-weight: bold; color: #666; transition: 0.2s; }
+        .tab.active { background: white; color: var(--accent); border-bottom: 3px solid var(--accent); margin-bottom: -2px; }
+        .controls { padding: 15px 2rem; display: flex; gap: 20px; background: white; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        select { padding: 8px; border-radius: 5px; border: 1px solid #ccc; min-width: 220px; font-size: 14px; }
+        .content { flex: 1; padding: 20px; overflow-y: auto; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { text-align: left; padding: 12px; border-bottom: 1px solid #eee; }
+        th { color: #888; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; }
+        .chart-container { height: 550px; position: relative; }
+        .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
+        .status-high { background: #fee2e2; color: #dc2626; }
+        .status-low { background: #dcfce7; color: #16a34a; }
     </style>
 </head>
 <body>
 
-    <h2>📊 Theme Park 7-Day Wait Averages</h2>
-    
-    <div class="controls">
-        <div>
-            <label>Park:</label> 
-            <select id="parkFilter" onchange="updateLandOptions()"></select>
-        </div>
-        
-        <div id="landWrapper">
-            <label>Land:</label> 
-            <select id="landFilter" onchange="renderChart()"></select>
+<header>
+    <h2 style="margin:0">🎢 Theme Park Analyst Pro</h2>
+    <div id="lastUpdate" style="font-size: 0.85rem; opacity: 0.9;">Syncing with CSV...</div>
+</header>
+
+<div class="tabs">
+    <button class="tab active" onclick="switchTab('efficiency')">Efficiency Scoreboard</button>
+    <button class="tab" onclick="switchTab('trends')">Demand Trends</button>
+    <button class="tab" onclick="switchTab('reliability')">System Reliability</button>
+</div>
+
+<div class="controls">
+    <div><label><b>Park:</b> </label><select id="parkFilter" onchange="processData()"></select></div>
+    <div id="landBox"><label><b>Land:</b> </label><select id="landFilter" onchange="processData()"></select></div>
+</div>
+
+<div class="content">
+    <div id="efficiencyView" class="tab-content">
+        <div class="card">
+            <h3>Bang-for-your-Buck (Live Efficiency)</h3>
+            <table id="efficiencyTable">
+                <thead><tr><th>Ride Name</th><th>Current Wait</th><th>Ride Length</th><th>Efficiency Score</th></tr></thead>
+                <tbody></tbody>
+            </table>
         </div>
     </div>
 
-    <div class="chart-container">
-        <canvas id="waitChart"></canvas>
+    <div id="trendsView" class="tab-content" style="display:none">
+        <div class="card chart-container">
+            <h3>7-Day Demand Profile (Wait Time Averages)</h3>
+            <canvas id="trendChart"></canvas>
+        </div>
     </div>
 
-    <script>
-        let globalData = [];
-        let chartInstance = null;
+    <div id="reliabilityView" class="tab-content" style="display:none">
+        <div class="grid">
+            <div class="card">
+                <h3>Technical Reliability (7-Day Uptime)</h3>
+                <table id="reliabilityTable">
+                    <thead><tr><th>Attraction</th><th>Uptime %</th><th>Failure Risk</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div class="card">
+                <h3>Identified Refurbishments</h3>
+                <ul id="refurbList" style="line-height: 2; color: #c0392b; font-weight: 500;"></ul>
+            </div>
+        </div>
+    </div>
+</div>
 
-        // 1. Load the CSV
-        Papa.parse("wait_times.csv", {
-            download: true,
-            header: true, // Set to true so the first row is ignored as data
-            skipEmptyLines: true,
-            complete: function(results) {
-                // Map the data to ensure we are using the correct keys regardless of CSV header naming
-                globalData = results.data.map(row => {
-                    // This handles cases where headers might have spaces or different casing
-                    const keys = Object.keys(row);
-                    return {
-                        fetch_timestamp: row[keys[0]],
-                        park_name: row[keys[1]],
-                        land: row[keys[2]],
-                        ride_name: row[keys[3]],
-                        wait_time: row[keys[4]],
-                        is_open: row[keys[5]]
-                    };
-                });
-                initDashboard();
-            }
+<script>
+// Data Sources: Universal (Estimated) | Disney (Urban Tastebud)
+const rideDurations = {
+    // Disneyland Exact CSV Matches
+    "Adventureland Treehouse inspired by Walt Disney’s Swiss Family Robinson": 15.0,
+    "Indiana Jones™ Adventure": 3.4,
+    "Jungle Cruise": 8.0,
+    "Walt Disney's Enchanted Tiki Room": 15.6,
+    "Davy Crockett's Explorer Canoes": 10.0,
+    "The Many Adventures of Winnie the Pooh": 3.0,
+    "Tiana's Bayou Adventure": 11.0,
+    "it's a small world": 15.0,
+    "Alice in Wonderland": 3.6,
+    "Casey Jr. Circus Train": 3.6,
+    "Dumbo the Flying Elephant": 1.5,
+    "King Arthur Carrousel": 2.0,
+    "Mad Tea Party": 1.5,
+    "Matterhorn Bobsleds": 2.0,
+    "Mr. Toad's Wild Ride": 2.0,
+    "Peter Pan's Flight": 2.3,
+    "Pinocchio's Daring Journey": 3.0,
+    "Snow White's Enchanted Wish": 2.0,
+    "Storybook Land Canal Boats": 6.0,
+    "Big Thunder Mountain Railroad": 3.3,
+    "Mark Twain Riverboat": 14.0,
+    "Sailing Ship Columbia": 12.0,
+    "Disneyland Railroad": 22.0,
+    "Great Moments with Mr. Lincoln": 16.0,
+    "Chip 'n' Dale's GADGETcoaster": 0.75,
+    "Mickey & Minnie's Runaway Railway": 5.0,
+    "Haunted Mansion": 9.0,
+    "Pirates of the Caribbean": 16.0,
+    "Millennium Falcon: Smugglers Run": 4.5,
+    "Star Wars: Rise of the Resistance": 18.0,
+    "Astro Orbitor": 1.5,
+    "Autopia": 5.1,
+    "Disneyland Monorail": 15.0,
+    "Finding Nemo Submarine Voyage": 14.0,
+    "Space Mountain": 3.0,
+    "Star Tours – The Adventures Continue": 5.0,
+
+    // DCA Exact CSV Matches
+    "Guardians of the Galaxy – Mission: BREAKOUT!": 2.1,
+    "WEB SLINGERS: A Spider-Man Adventure": 3.4,
+    "Luigi's Rollickin' Roadsters": 1.0,
+    "Mater's Junkyard Jamboree": 1.5,
+    "Radiator Springs Racers": 4.0,
+    "Grizzly River Run": 6.0,
+    "Soarin' Around the World": 4.75,
+    "Mickey's PhilharMagic": 12.0,
+    "Monsters, Inc. Mike & Sulley to the Rescue!": 4.1,
+    "Turtle Talk with Crush": 17.0,
+    "Golden Zephyr": 1.5,
+    "Goofy's Sky School": 1.75,
+    "The Little Mermaid ~ Ariel's Undersea Adventure": 7.0,
+    "Incredicoaster": 1.3,
+    "Inside Out Emotional Whirlwind": 1.5,
+    "Jessie's Critter Carousel": 2.0,
+    "Jumpin' Jellyfish": 1.5,
+    "Pixar Pal-A-Round – Non-Swinging": 9.0,
+    "Pixar Pal-A-Round – Swinging": 9.0,
+    "Toy Story Midway Mania!": 8.0,
+
+    // Universal Exact CSV Matches
+    "Jurassic World — The Ride": 9.5,
+    "Revenge of the Mummy – The Ride": 2.0,
+    "Despicable Me Minion Mayhem": 4.0,
+    "Silly Swirly": 2.0,
+    "The Secret Life of Pets: Off the Leash": 4.0,
+    "The Simpsons Ride™": 4.5,
+    "Mario Kart™: Bowser’s Challenge": 4.0,
+    "Flight of the Hippogriff™": 1.0,
+    "Harry Potter and the Forbidden Journey™": 4.0,
+    "TRANSFORMERS™: The Ride-3D": 4.5,
+    "Studio Tour": 60.0
+};
+
+// Normalization function for "Close Enough" matching
+function norm(s) { return (s||"").toLowerCase().replace(/[^\w]/g, '').trim(); }
+const normMap = {};
+Object.keys(rideDurations).forEach(k => normMap[norm(k)] = rideDurations[k]);
+
+let globalData = [];
+let trendChart = null;
+
+Papa.parse("wait_times.csv", {
+    download: true, header: true, skipEmptyLines: true,
+    complete: function(results) {
+        globalData = results.data.map(row => {
+            const k = Object.keys(row);
+            return {
+                ts: row[k[0]], pk: row[k[1]], ld: row[k[2]], rd: row[k[3]],
+                wt: parseInt(row[k[4]]) || 0,
+                op: row[k[5]] === "True" || row[k[5]] === true
+            };
         });
+        const parks = [...new Set(globalData.map(d => d.pk))].filter(p => p && p.length > 3 && p !== "park_name");
+        const pSel = document.getElementById('parkFilter');
+        parks.forEach(p => pSel.add(new Option(p, p)));
+        document.getElementById('lastUpdate').innerText = "Last Point: " + globalData[globalData.length-1].ts;
+        processData();
+    }
+});
 
-        function initDashboard() {
-            // Get unique parks and filter out any header artifacts or junk
-            const parks = [...new Set(globalData.map(i => i.park_name))]
-                            .filter(p => p && p !== "park_name" && isNaN(p) && p.length > 2);
-            
-            const parkSelect = document.getElementById('parkFilter');
-            parkSelect.innerHTML = '';
-            parks.forEach(park => {
-                let opt = document.createElement('option');
-                opt.value = opt.innerText = park;
-                parkSelect.appendChild(opt);
-            });
-            updateLandOptions();
+function switchTab(view) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(v => v.style.display = 'none');
+    event.target.classList.add('active');
+    document.getElementById(view + 'View').style.display = 'block';
+}
+
+function processData() {
+    const park = document.getElementById('parkFilter').value;
+    const lBox = document.getElementById('landBox');
+    const lSel = document.getElementById('landFilter');
+
+    if (park.includes("Universal")) {
+        lBox.style.display = 'none';
+        render(park, "ALL");
+    } else {
+        lBox.style.display = 'block';
+        const lands = [...new Set(globalData.filter(d => d.pk === park).map(d => d.ld))]
+                        .filter(l => l && !l.toLowerCase().includes("halloween"));
+        const cur = lSel.value;
+        lSel.innerHTML = "";
+        lands.forEach(l => lSel.add(new Option(l, l)));
+        if (lands.includes(cur)) lSel.value = cur;
+        render(park, lSel.value);
+    }
+}
+
+function render(park, land) {
+    const cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const parkData = globalData.filter(d => d.pk === park);
+    const filtered = parkData.filter(d => {
+        const dDate = new Date(d.ts);
+        return dDate >= cutoff && (land === "ALL" || d.ld === land) && !(d.ld||"").toLowerCase().includes("halloween");
+    });
+
+    updateEfficiency(filtered);
+    updateTrends(filtered);
+    updateReliability(parkData);
+}
+
+function updateEfficiency(data) {
+    if (!data.length) return;
+    const latest = data[data.length-1].ts;
+    const current = data.filter(d => d.ts === latest);
+    const tbody = document.querySelector('#efficiencyTable tbody');
+    tbody.innerHTML = "";
+
+    const rows = current.map(d => {
+        // Try exact match, then normalized match
+        const dur = rideDurations[d.rd] || normMap[norm(d.rd)] || 0;
+        const score = dur > 0 ? (dur / (d.wt + dur) * 100).toFixed(0) : 0;
+        return { name: d.rd, wt: d.wt, dur, score };
+    }).sort((a,b) => b.score - a.score);
+
+    rows.forEach(r => {
+        if (r.dur === 0) return;
+        tbody.innerHTML += `<tr><td>${r.name}</td><td>${r.wt}m</td><td>${r.dur}m</td><td><strong style="color:var(--accent)">${r.score}%</strong></td></tr>`;
+    });
+}
+
+function updateTrends(data) {
+    const rides = [...new Set(data.map(d => d.rd))].filter(r => isNaN(r) && r.length > 3);
+    const buckets = {};
+    data.forEach(d => {
+        const t = (d.ts||"").split(' ')[1].substring(0,5);
+        if(!buckets[t]) buckets[t] = {};
+        if(!buckets[t][d.rd]) buckets[t][d.rd] = [];
+        buckets[t][d.rd].push(d.wt);
+    });
+
+    const sortedTimes = Object.keys(buckets).sort();
+    const datasets = rides.map((r, i) => ({
+        label: r,
+        data: sortedTimes.map(t => {
+            const v = buckets[t][r];
+            return v ? (v.reduce((a,b)=>a+b,0)/v.length).toFixed(0) : null;
+        }),
+        borderColor: `hsl(${i * 137.5}, 65%, 50%)`,
+        borderWidth: 2, pointRadius: 0, tension: 0.3
+    }));
+
+    if (trendChart) trendChart.destroy();
+    trendChart = new Chart(document.getElementById('trendChart'), {
+        type: 'line',
+        data: { labels: sortedTimes, datasets },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: {size: 10}}}} }
+    });
+}
+
+function updateReliability(parkData) {
+    const stats = {};
+    const cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    parkData.forEach(d => {
+        if (new Date(d.ts) < cutoff) return;
+        if (!stats[d.rd]) stats[d.rd] = { op: 0, tot: 0, ev: false };
+        stats[d.rd].tot++;
+        if (d.op) { stats[d.rd].op++; stats[d.rd].ev = true; }
+    });
+
+    const tbody = document.querySelector('#reliabilityTable tbody');
+    const rList = document.getElementById('refurbList');
+    tbody.innerHTML = ""; rList.innerHTML = "";
+
+    Object.keys(stats).sort().forEach(n => {
+        if (!isNaN(n) || n.length < 3 || n.toLowerCase().includes("halloween")) return;
+        const s = stats[n];
+        const up = (s.op / s.tot * 100).toFixed(1);
+        if (!s.ev) {
+            rList.innerHTML += `<li>${n}</li>`;
+        } else {
+            const risk = up < 92 ? 'status-high' : 'status-low';
+            tbody.innerHTML += `<tr><td>${n}</td><td>${up}%</td><td><span class="status-badge ${risk}">${up < 92 ? 'High Risk' : 'Reliable'}</span></td></tr>`;
         }
-
-        function updateLandOptions() {
-            const selectedPark = document.getElementById('parkFilter').value;
-            const landWrapper = document.getElementById('landWrapper');
-            const landSelect = document.getElementById('landFilter');
-            
-            // Universal Studios Hollywood (ID 66) logic
-            if (selectedPark === "Universal Studios Hollywood") {
-                landWrapper.style.display = "none";
-                landSelect.innerHTML = '<option value="ALL">All Rides</option>';
-            } else {
-                landWrapper.style.display = "inline-block";
-                const lands = [...new Set(globalData.filter(i => i.park_name === selectedPark).map(i => i.land))]
-                                .filter(l => l && l !== "land" && l.trim() !== "" && !l.toLowerCase().includes("halloween"));
-                
-                landSelect.innerHTML = '';
-                lands.forEach(land => {
-                    let opt = document.createElement('option');
-                    opt.value = opt.innerText = land;
-                    landSelect.appendChild(opt);
-                });
-            }
-            renderChart();
-        }
-
-        function renderChart() {
-            const park = document.getElementById('parkFilter').value;
-            const land = document.getElementById('landFilter').value;
-
-            const now = new Date();
-            const sevenDaysAgo = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
-
-            const filtered = globalData.filter(i => {
-                const ts = i.fetch_timestamp;
-                if (!ts || ts === "fetch_timestamp") return false;
-                
-                const itemDate = new Date(ts);
-                const isCorrectPark = i.park_name === park;
-                const isWithinWeek = itemDate >= sevenDaysAgo;
-                
-                const isUniversal = park === "Universal Studios Hollywood";
-                const isCorrectLand = isUniversal || (land === "ALL" || i.land === land);
-
-                // Filter out Halloween
-                const landStr = (i.land || "").toLowerCase();
-                const rideStr = (i.ride_name || "").toLowerCase();
-                const isHalloween = landStr === "halloween" || rideStr.includes("halloween");
-
-                return isCorrectPark && isWithinWeek && isCorrectLand && !isHalloween;
-            });
-
-            const timeBuckets = {}; 
-            const ridesSet = new Set();
-
-            filtered.forEach(row => {
-                const ride = row.ride_name;
-                const ts = row.fetch_timestamp;
-                
-                // Final check to avoid numbers in legend
-                if (!ride || ride === "ride_name" || !isNaN(ride) || ride.length < 3) return;
-
-                const timeMatch = ts.match(/(\d{2}:\d{2})/);
-                if (!timeMatch) return;
-                const timeStr = timeMatch[0];
-                
-                const wait = parseInt(row.wait_time);
-                if (isNaN(wait)) return;
-
-                ridesSet.add(ride);
-                if (!timeBuckets[timeStr]) timeBuckets[timeStr] = {};
-                if (!timeBuckets[timeStr][ride]) timeBuckets[timeStr][ride] = [];
-                timeBuckets[timeStr][ride].push(wait);
-            });
-
-            const sortedTimes = Object.keys(timeBuckets).sort();
-            const datasets = Array.from(ridesSet).map((ride, index) => {
-                const hue = (index * 137.5) % 360; 
-                return {
-                    label: ride,
-                    data: sortedTimes.map(t => {
-                        const vals = timeBuckets[t][ride];
-                        if (!vals) return null;
-                        const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
-                        return Math.round(avg);
-                    }),
-                    borderColor: `hsl(${hue}, 70%, 45%)`,
-                    backgroundColor: `hsla(${hue}, 70%, 45%, 0.1)`,
-                    borderWidth: 2,
-                    pointRadius: 0, 
-                    tension: 0.3
-                };
-            });
-
-            if (chartInstance) chartInstance.destroy();
-
-            const ctx = document.getElementById('waitChart').getContext('2d');
-            chartInstance = new Chart(ctx, {
-                type: 'line',
-                data: { labels: sortedTimes, datasets: datasets },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: { mode: 'index', intersect: false },
-                    plugins: {
-                        legend: { 
-                            position: 'bottom', 
-                            labels: { boxWidth: 10, padding: 8, font: { size: 10 } } 
-                        }
-                    },
-                    scales: {
-                        y: { beginAtZero: true, title: { display: true, text: 'Avg Minutes' } },
-                        x: { ticks: { maxTicksLimit: 24 } }
-                    }
-                }
-            });
-        }
-    </script>
+    });
+}
+</script>
 </body>
 </html>
