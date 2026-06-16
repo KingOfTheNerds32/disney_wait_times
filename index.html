@@ -71,17 +71,39 @@ const normMap = {}; Object.keys(rideDurations).forEach(k => normMap[norm(k)] = r
 
 let globalData = [];
 let trendChart = null;
+let maxFileDate = new Date(); // Fallback date placeholder
 
 Papa.parse("wait_times.csv", {
     download: true, header: true, skipEmptyLines: true,
     complete: function(results) {
+        if (!results.data || results.data.length === 0) {
+            document.getElementById('lastUpdate').innerText = "Error: CSV data is empty.";
+            return;
+        }
+
         globalData = results.data.map(row => {
             const k = Object.keys(row);
-            return { ts: row[k[0]], pk: row[k[1]], ld: row[k[2]], rd: row[k[3]], wt: parseInt(row[k[4]]) || 0, op: row[k[5]] === "True" || row[k[5]] === true };
-        });
+            return { 
+                ts: row[k[0]], 
+                pk: row[k[1]], 
+                ld: row[k[2]], 
+                rd: row[k[3]], 
+                wt: parseInt(row[k[4]]) || 0, 
+                op: row[k[5]] === "True" || row[k[5]] === true 
+            };
+        }).filter(d => d.pk && d.ts); // Sanitization check
+
+        // Find the absolute maximum date present in the file to pivot cutoffs cleanly
+        const timestamps = globalData.map(d => new Date(d.ts).getTime()).filter(t => !isNaN(t));
+        if (timestamps.length > 0) {
+            maxFileDate = new Date(Math.max(...timestamps));
+        }
+
         const parks = [...new Set(globalData.map(d => d.pk))].filter(p => p && p.length > 3 && p !== "park_name");
         const pSel = document.getElementById('parkFilter');
+        pSel.innerHTML = ""; // Clear lingering targets
         parks.forEach(p => pSel.add(new Option(p, p)));
+        
         document.getElementById('lastUpdate').innerText = "Last Data: " + globalData[globalData.length-1].ts;
         updateLandOptions();
     }
@@ -90,7 +112,7 @@ Papa.parse("wait_times.csv", {
 function switchTab(view) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(v => v.style.display = 'none');
-    event.target.classList.add('active');
+    if(event && event.target) event.target.classList.add('active');
     document.getElementById(view + 'View').style.display = 'block';
 }
 
@@ -99,7 +121,7 @@ function updateLandOptions() {
     const lSel = document.getElementById('landFilter');
     lSel.innerHTML = '<option value="ALL">All Lands</option>';
     
-    if (!park.includes("Universal")) {
+    if (park && !park.includes("Universal")) {
         const lands = [...new Set(globalData.filter(d => d.pk === park).map(d => d.ld))].filter(l => l && !l.toLowerCase().includes("halloween"));
         lands.forEach(l => lSel.add(new Option(l, l)));
     }
@@ -108,8 +130,12 @@ function updateLandOptions() {
 
 function processData() {
     const park = document.getElementById('parkFilter').value;
+    if (!park) return;
+    
     const land = document.getElementById('landFilter').value;
-    const cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    
+    // Core Fix: Calculate the 7-day window backwards from the newest log in the file, not current time
+    const cutoff = new Date(maxFileDate.getTime() - 7 * 24 * 60 * 60 * 1000);
     
     const filtered = globalData.filter(d => {
         const dDate = new Date(d.ts);
@@ -121,11 +147,13 @@ function processData() {
 }
 
 function renderMasterTable(data, park) {
+    const tbody = document.querySelector('#masterTable tbody');
+    tbody.innerHTML = "";
     if (!data.length) return;
+    
     const latestTs = data[data.length-1].ts;
     const current = data.filter(d => d.ts === latestTs);
     
-    // Calculate Uptime for all rides in the park (last 7 days)
     const stats = {};
     data.forEach(d => {
         if (!stats[d.rd]) stats[d.rd] = { op: 0, tot: 0, ev: false };
@@ -133,11 +161,8 @@ function renderMasterTable(data, park) {
         if (d.op) { stats[d.rd].op++; stats[d.rd].ev = true; }
     });
 
-    const tbody = document.querySelector('#masterTable tbody');
-    tbody.innerHTML = "";
-
     current.forEach(d => {
-        if (!isNaN(d.rd) || d.rd.length < 3) return;
+        if (!d.rd || !isNaN(d.rd) || d.rd.length < 3) return;
         const dur = rideDurations[d.rd] || normMap[norm(d.rd)] || 0;
         const eff = dur > 0 ? Math.round((dur / (d.wt + dur)) * 100) : 0;
         const s = stats[d.rd];
@@ -164,10 +189,12 @@ function sortTable(n) {
             shouldSwitch = false;
             x = rows[i].getElementsByTagName("TD")[n];
             y = rows[i + 1].getElementsByTagName("TD")[n];
+            if (!x || !y) continue;
+            
             let valX = x.innerText.toLowerCase().replace('%','').replace('m','');
             let valY = y.innerText.toLowerCase().replace('%','').replace('m','');
             
-            if (n > 0) { // Numerical sort for wait, eff, uptime
+            if (n > 0) { 
                 valX = parseFloat(valX) || 0;
                 valY = parseFloat(valY) || 0;
             }
@@ -188,14 +215,19 @@ function sortTable(n) {
 }
 
 function renderTrends(data) {
-    const rides = [...new Set(data.map(d => d.rd))].filter(r => isNaN(r) && r.length > 3);
+    if (!data.length) return;
+    const rides = [...new Set(data.map(d => d.rd))].filter(r => r && isNaN(r) && r.length > 3);
     const buckets = {};
+    
     data.forEach(d => {
-        const t = d.ts.split(' ')[1].substring(0,5);
+        const parts = (d.ts || "").split(' ');
+        if (parts.length < 2) return;
+        const t = parts[1].substring(0,5);
         if(!buckets[t]) buckets[t] = {};
         if(!buckets[t][d.rd]) buckets[t][d.rd] = [];
         buckets[t][d.rd].push(d.wt);
     });
+    
     const sortedTimes = Object.keys(buckets).sort();
     const datasets = rides.map((r, i) => ({
         label: r, data: sortedTimes.map(t => {
@@ -204,6 +236,7 @@ function renderTrends(data) {
         }),
         borderColor: `hsl(${i * 137.5}, 65%, 50%)`, borderWidth: 2, pointRadius: 0, tension: 0.3
     }));
+    
     if (trendChart) trendChart.destroy();
     trendChart = new Chart(document.getElementById('trendChart'), {
         type: 'line',
