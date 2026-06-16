@@ -71,7 +71,7 @@ const normMap = {}; Object.keys(rideDurations).forEach(k => normMap[norm(k)] = r
 
 let globalData = [];
 let trendChart = null;
-let maxFileDate = new Date(); // Fallback date placeholder
+let maxFileDate = new Date(); 
 
 Papa.parse("wait_times.csv", {
     download: true, header: true, skipEmptyLines: true,
@@ -91,9 +91,8 @@ Papa.parse("wait_times.csv", {
                 wt: parseInt(row[k[4]]) || 0, 
                 op: row[k[5]] === "True" || row[k[5]] === true 
             };
-        }).filter(d => d.pk && d.ts); // Sanitization check
+        }).filter(d => d.pk && d.ts); 
 
-        // Find the absolute maximum date present in the file to pivot cutoffs cleanly
         const timestamps = globalData.map(d => new Date(d.ts).getTime()).filter(t => !isNaN(t));
         if (timestamps.length > 0) {
             maxFileDate = new Date(Math.max(...timestamps));
@@ -101,7 +100,7 @@ Papa.parse("wait_times.csv", {
 
         const parks = [...new Set(globalData.map(d => d.pk))].filter(p => p && p.length > 3 && p !== "park_name");
         const pSel = document.getElementById('parkFilter');
-        pSel.innerHTML = ""; // Clear lingering targets
+        pSel.innerHTML = ""; 
         parks.forEach(p => pSel.add(new Option(p, p)));
         
         document.getElementById('lastUpdate').innerText = "Last Data: " + globalData[globalData.length-1].ts;
@@ -133,8 +132,6 @@ function processData() {
     if (!park) return;
     
     const land = document.getElementById('landFilter').value;
-    
-    // Core Fix: Calculate the 7-day window backwards from the newest log in the file, not current time
     const cutoff = new Date(maxFileDate.getTime() - 7 * 24 * 60 * 60 * 1000);
     
     const filtered = globalData.filter(d => {
@@ -220,9 +217,20 @@ function renderTrends(data) {
     const buckets = {};
     
     data.forEach(d => {
-        const parts = (d.ts || "").split(' ');
-        if (parts.length < 2) return;
-        const t = parts[1].substring(0,5);
+        if (!d.ts) return;
+        
+        // Coerce timestamp format safely to support multiple variation layouts
+        const timeString = d.ts instanceof Date ? d.ts.toISOString() : String(d.ts);
+        
+        let t = "";
+        if (timeString.includes('T')) {
+            t = timeString.split('T')[1].substring(0, 5);
+        } else if (timeString.includes(' ')) {
+            t = timeString.split(' ')[1].substring(0, 5);
+        } else {
+            return;
+        }
+
         if(!buckets[t]) buckets[t] = {};
         if(!buckets[t][d.rd]) buckets[t][d.rd] = [];
         buckets[t][d.rd].push(d.wt);
