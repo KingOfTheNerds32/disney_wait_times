@@ -1,0 +1,36 @@
+name: One-Time May Data Recovery
+on:
+  workflow_dispatch: # Allows you to manually click "Run workflow" from GitHub
+
+permissions:
+  contents: write
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # CRITICAL: Tells Git to retrieve your entire history, not just the latest commit
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: pip install pandas pyarrow
+
+      - name: Run Recovery Engine
+        run: python recover_may.py
+
+      - name: Commit Recovered File
+        run: |
+          git config --global user.name "DisneyBot"
+          git config --global user.email "bot@github.com"
+          git add history/ || true
+          git commit -m "Recovered missing May 2026 logs [skip ci]" || true
+          git push || true
