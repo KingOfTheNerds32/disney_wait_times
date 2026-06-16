@@ -16,12 +16,53 @@
         .content { flex: 1; padding: 20px; overflow-y: auto; }
         .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 20px; }
         table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; padding: 12px; border-bottom: 2px solid #eee; color: #888; font-size: 0.75rem; text-transform: uppercase; cursor: pointer; user-select: none; }
+        th { text-align: left; padding: 12px; border-bottom: 2px solid #eee; color: #888; font-size: 0.75rem; text-transform: uppercase; cursor: pointer; user-select: none; position: relative; }
         th:hover { color: var(--accent); }
+        
+        /* Inline Header Definitions CSS */
+        th[data-tooltip]:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #333;
+            color: #fff;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            text-transform: none;
+            white-space: normal;
+            width: 220px;
+            z-index: 10;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            font-weight: normal;
+        }
+        
+        /* Status Hover Explanations CSS */
+        .status-badge {
+            cursor: help;
+            border-bottom: 1px dotted #ccc;
+        }
+        .status-badge[data-reason]:hover::after {
+            content: attr(data-reason);
+            position: absolute;
+            background-color: #2c3e50;
+            color: white;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-left: 10px;
+            z-index: 10;
+            white-space: nowrap;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+        }
+
         td { padding: 12px; border-bottom: 1px solid #eee; font-size: 0.95rem; }
         tr:hover { background: #f9f9f9; }
         .chart-container { height: 500px; position: relative; }
         .refurb-note { color: #c0392b; font-size: 0.85rem; font-weight: bold; }
+        .status-closed { color: #e67e22; font-size: 0.85rem; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -49,8 +90,8 @@
                     <tr>
                         <th onclick="sortTable(0)">Ride Name ↕</th>
                         <th onclick="sortTable(1)">Wait ↕</th>
-                        <th onclick="sortTable(2)">Efficiency ↕</th>
-                        <th onclick="sortTable(3)">7-Day Uptime ↕</th>
+                        <th onclick="sortTable(2)" data-tooltip="Efficiency = (Ride Duration / (Wait Time + Ride Duration)) * 100. Higher % means less time spent waiting relative to your ride experience.">Efficiency ↕</th>
+                        <th onclick="sortTable(3)" data-tooltip="7-Day Uptime = (Total Open Logs / Total Logs Collected) * 100. Measures operational consistency over the past week.">7-Day Uptime ↕</th>
                     </tr>
                 </thead>
                 <tbody></tbody>
@@ -64,7 +105,7 @@
 </div>
 
 <script>
-const rideDurations = {"Adventureland Treehouse inspired by Walt Disney’s Swiss Family Robinson": 15.0, "Indiana Jones™ Adventure": 3.4, "Jungle Cruise": 8.0, "Walt Disney's Enchanted Tiki Room": 15.6, "Davy Crockett's Explorer Canoes": 10.0, "The Many Adventures of Winnie the Pooh": 3.0, "Tiana's Bayou Adventure": 11.0, "it's a small world": 15.0, "Alice in Wonderland": 3.6, "Casey Jr. Circus Train": 3.6, "Dumbo the Flying Elephant": 1.5, "King Arthur Carrousel": 2.0, "Mad Tea Party": 1.5, "Matterhorn Bobsleds": 2.0, "Mr. Toad's Wild Ride": 2.0, "Peter Pan's Flight": 2.3, "Pinocchio's Daring Journey": 3.0, "Snow White's Enchanted Wish": 2.0, "Storybook Land Canal Boats": 6.0, "Big Thunder Mountain Railroad": 3.3, "Mark Twain Riverboat": 14.0, "Sailing Ship Columbia": 12.0, "Disneyland Railroad": 22.0, "Great Moments with Mr. Lincoln": 16.0, "Chip 'n' Dale's GADGETcoaster": 0.75, "Mickey & Minnie's Runaway Railway": 5.0, "Haunted Mansion": 9.0, "Pirates of the Caribbean": 16.0, "Millennium Falcon: Smugglers Run": 4.5, "Star Wars: Rise of the Resistance": 18.0, "Astro Orbitor": 1.5, "Autopia": 5.1, "Disneyland Monorail": 15.0, "Finding Nemo Submarine Voyage": 14.0, "Space Mountain": 3.0, "Star Tours – The Adventures Continue": 5.0, "Guardians of the Galaxy – Mission: BREAKOUT!": 2.1, "WEB SLINGERS: A Spider-Man Adventure": 3.4, "Luigi's Rollickin' Roadsters": 1.0, "Mater's Junkyard Jamboree": 1.5, "Radiator Springs Racers": 4.0, "Grizzly River Run": 6.0, "Soarin' Around the World": 4.75, "Mickey's PhilharMagic": 12.0, "Monsters, Inc. Mike & Sulley to the Rescue!": 4.1, "Turtle Talk with Crush": 17.0, "Golden Zephyr": 1.5, "Goofy's Sky School": 1.75, "The Little Mermaid ~ Ariel's Undersea Adventure": 7.0, "Incredicoaster": 1.3, "Inside Out Emotional Whirlwind": 1.5, "Jessie's Critter Carousel": 2.0, "Jumpin' Jellyfish": 1.5, "Pixar Pal-A-Round – Non-Swinging": 9.0, "Pixar Pal-A-Round – Swinging": 9.0, "Toy Story Midway Mania!": 8.0, "Jurassic World — The Ride": 9.5, "Revenge of the Mummy – The Ride": 2.0, "Despicable Me Minion Mayhem": 4.0, "Silly Swirly": 2.0, "The Secret Life of Pets: Off the Unleased": 4.0, "The Simpsons Ride™": 4.5, "Mario Kart™: Bowser’s Challenge": 4.0, "Flight of the Hippogriff™": 1.0, "Harry Potter and the Forbidden Journey™": 4.0, "TRANSFORMERS™: The Ride-3D": 4.5, "Studio Tour": 60.0};
+const rideDurations = {"Adventureland Treehouse inspired by Walt Disney’s Swiss Family Robinson": 15.0, "Indiana Jones™ Adventure": 3.4, "Jungle Cruise": 8.0, "Walt Disney's Enchanted Tiki Room": 15.6, "Davy Crockett's Explorer Canoes": 10.0, "The Many Adventures of Winnie the Pooh": 3.0, "Tiana's Bayou Adventure": 11.0, "it's a small world": 15.0, "Alice in Wonderland": 3.6, "Casey Jr. Circus Train": 3.6, "Dumbo the Flying Elephant": 1.5, "King Arthur Carrousel": 2.0, "Mad Tea Party": 1.5, "Matterhorn Bobsleds": 2.0, "Mr. Toad's Wild Ride": 2.0, "Peter Pan's Flight": 2.3, "Pinocchio's Daring Journey": 3.0, "Snow White's Enchanted Wish": 2.0, "Storybook Land Canal Boats": 6.0, "Big Thunder Mountain Railroad": 3.3, "Mark Twain Riverboat": 14.0, "Sailing Ship Columbia": 12.0, "Disneyland Railroad": 22.0, "Great Moments with Mr. Lincoln": 16.0, "Chip 'n' Dale's GADGETcoaster": 0.75, "Mickey & Minnie's Runaway Railway": 5.0, "Haunted Mansion": 9.0, "Pirates of the Caribbean": 16.0, "Millennium Falcon: Smugglers Run": 4.5, "Star Wars: Rise of the Resistance": 18.0, "Astro Orbitor": 1.5, "Autopia": 5.1, "Disneyland Monorail": 15.0, "Finding Nemo Submarine Voyage": 14.0, "Space Mountain": 3.0, "Star Tours – The Adventures Continue": 5.0, "Guardians of the Galaxy – Mission: BREAKOUT!": 2.1, "WEB SLINGERS: A Spider-Man Adventure": 3.4, "Luigi's Rollickin' Roadsters": 1.0, "Mater's Junkyard Jamboree": 1.5, "Radiator Springs Racers": 4.0, "Grizzly River Run": 6.0, "Soarin' Around the World": 4.75, "Mickey's PhilharMagic": 12.0, "Monsters, Inc. Mike & Sulley to the Rescue!": 4.1, "Turtle Talk with Crush": 17.0, "Golden Zephyr": 1.5, "Goofy's Sky School": 1.75, "The Little Mermaid ~ Ariel's Undersea Adventure": 7.0, "Incredicoaster": 1.3, "Inside Out Emotional Whirlwind": 1.5, "Jessie's Critter Carousel": 2.0, "Jumpin' Jellyfish": 1.5, "Pixar Pal-A-Round – Non-Swinging": 9.0, "Pixar Pal-A-Round – Swinging": 9.0, "Toy Story Midway Mania!": 8.0, "Jurassic World — The Ride": 9.5, "Revenge of the Mummy – The Ride": 2.0, "Despicable Me Minion Mayhem": 4.0, "Silly Swirly": 2.0, "The Secret Life of Pets: Off the Leash": 4.0, "The Simpsons Ride™": 4.5, "Mario Kart™: Bowser’s Challenge": 4.0, "Flight of the Hippogriff™": 1.0, "Harry Potter and the Forbidden Journey™": 4.0, "TRANSFORMERS™: The Ride-3D": 4.5, "Studio Tour": 60.0};
 
 function norm(s) { return (s||"").toLowerCase().replace(/[^\w]/g, '').trim(); }
 const normMap = {}; Object.keys(rideDurations).forEach(k => normMap[norm(k)] = rideDurations[k]);
@@ -73,7 +114,7 @@ let globalData = [];
 let trendChart = null;
 let maxFileDate = new Date(); 
 
-Papa.parse("wait_times.csv?v=" + Date.now(), {
+Papa.parse(`./wait_times.csv?v=${Date.now()}`, {
     download: true, header: true, skipEmptyLines: true,
     complete: function(results) {
         if (!results.data || results.data.length === 0) {
@@ -81,7 +122,6 @@ Papa.parse("wait_times.csv?v=" + Date.now(), {
             return;
         }
 
-        // Fixed map step utilizing string literal column names
         globalData = results.data.map(row => {
             return { 
                 ts: row['fetch_timestamp'], 
@@ -133,24 +173,11 @@ function processData() {
     
     const land = document.getElementById('landFilter').value;
     const cutoff = new Date(maxFileDate.getTime() - 7 * 24 * 60 * 60 * 1000);
-    
-    console.log("--- Dashboard Diagnostic Log ---");
-    console.log("Selected Park in Dropdown:", park);
-    console.log("Total rows parsed inside globalData:", globalData.length);
-    if (globalData.length > 0) console.log("First row item structural check:", globalData[0]);
 
     const filtered = globalData.filter(d => {
         const dDate = new Date(d.ts);
-        const matchesPark = d.pk === park;
-        const matchesLand = (land === "ALL" || d.ld === land);
-        const matchesDate = dDate >= cutoff;
-        const isNotHalloween = !(d.ld||"").toLowerCase().includes("halloween");
-        
-        return matchesPark && matchesLand && matchesDate && isNotHalloween;
+        return d.pk === park && (land === "ALL" || d.ld === land) && dDate >= cutoff && !(d.ld||"").toLowerCase().includes("halloween");
     });
-
-    console.log("Total rows remaining AFTER filter window validation:", filtered.length);
-    console.log("--------------------------------");
 
     renderMasterTable(filtered, park);
     renderTrends(filtered);
@@ -179,10 +206,20 @@ function renderMasterTable(data, park) {
         const uptime = s ? Math.round((s.op / s.tot) * 100) : 0;
         const isRefurb = s && !s.ev;
 
+        // Custom Hover-States explaining the logic matching your criteria
+        let statusHtml = "";
+        if (isRefurb) {
+            statusHtml = `<span class="status-badge refurb-note" data-reason="REFURB: This ride has reported 0% uptime across the entire 7-day data block.">REFURB</span>`;
+        } else if (!d.op) {
+            statusHtml = `<span class="status-badge status-closed" data-reason="CLOSED: Temporarily down due to weather, maintenance delay, or standard park closing hours.">CLOSED</span>`;
+        } else {
+            statusHtml = `${d.wt}m`;
+        }
+
         tbody.innerHTML += `
             <tr>
                 <td><b>${d.rd}</b></td>
-                <td>${d.op ? d.wt + 'm' : '<span class="refurb-note">CLOSED</span>'}</td>
+                <td>${statusHtml}</td>
                 <td>${eff > 0 ? eff + '%' : '--'}</td>
                 <td>${isRefurb ? '<span class="refurb-note">REFURB</span>' : uptime + '%'}</td>
             </tr>`;
@@ -231,8 +268,6 @@ function renderTrends(data) {
     
     data.forEach(d => {
         if (!d.ts) return;
-        
-        // Coerce input format variation layouts cleanly
         const timeString = d.ts instanceof Date ? d.ts.toISOString() : String(d.ts);
         
         let t = "";
@@ -249,20 +284,48 @@ function renderTrends(data) {
         buckets[t][d.rd].push(d.wt);
     });
     
+    // Core Chart Fix: Sort and clean X-axis labels to exactly 24 hours of 5-min intervals
     const sortedTimes = Object.keys(buckets).sort();
+    
     const datasets = rides.map((r, i) => ({
-        label: r, data: sortedTimes.map(t => {
+        label: r, 
+        data: sortedTimes.map(t => {
             const v = buckets[t][r];
-            return v ? (v.reduce((a,b)=>a+b,0)/v.length).toFixed(0) : null;
+            // Now safely mathematical: calculates true average for this specific point across all 7 days
+            return v && v.length > 0 ? Math.round(v.reduce((a,b)=>a+b,0)/v.length) : null;
         }),
-        borderColor: `hsl(${i * 137.5}, 65%, 50%)`, borderWidth: 2, pointRadius: 0, tension: 0.3
+        borderColor: `hsl(${i * 137.5}, 65%, 50%)`, 
+        borderWidth: 2, 
+        pointRadius: 0, 
+        tension: 0.3
     }));
     
     if (trendChart) trendChart.destroy();
     trendChart = new Chart(document.getElementById('trendChart'), {
         type: 'line',
         data: { labels: sortedTimes, datasets },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: {size: 10}}}} }
+        options: { 
+            responsive: true, 
+            maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                intersect: false
+            },
+            plugins: { 
+                legend: { 
+                    position: 'bottom', 
+                    labels: { boxWidth: 10, font: {size: 10}}
+                },
+                tooltip: {
+                    enabled: true,
+                    position: 'nearest'
+                }
+            },
+            scales: {
+                x: { grid: { display: false } },
+                y: { title: { display: true, text: 'Wait Time (Minutes)' } }
+            }
+        }
     });
 }
 </script>
