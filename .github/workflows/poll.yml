@@ -2,13 +2,17 @@
 name: Disney Poller
 on:
   # schedule:
-  #  - cron: '*/6 * * * *'  # Runs every 5 minutes
+  #   - cron: '*/6 * * * *'  # Runs every 5 minutes
   repository_dispatch:
     types: [poll-disney]
   workflow_dispatch:        # Allows manual trigger
 
 permissions: 
   contents: write
+
+# Fixes the Node.js deprecation warning from image_deeaa6.png
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
 
 jobs:
   build:
@@ -19,11 +23,13 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.9'
+          python-version: '3.10'
 
       - name: Install dependencies
         # This installs the packages you need into the cloud runner
-        run: pip install requests pandas pytz
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests pandas pytz
 
       - name: Run wait_time_scraper
         run: python wait_time_scraper.py
@@ -32,6 +38,8 @@ jobs:
         run: |
           git config --global user.name "DisneyBot"
           git config --global user.email "bot@github.com"
-          git add wait_times.csv
-          git commit -m "Update wait times for both parks" || exit 0
-          git push
+          git add wait_times.csv || true
+          
+          # "|| true" ensures that if there are no new rows to log, the workflow exits gracefully instead of crashing with exit code 1
+          git commit -m "Update wait times for both parks [skip ci]" || true
+          git push || true
