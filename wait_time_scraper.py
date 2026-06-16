@@ -53,7 +53,12 @@ def pull_wait_times():
         else:
             combined_df = new_data_df
 
-        combined_df['fetch_timestamp'] = pd.to_datetime(combined_df['fetch_timestamp'])
+        # 'coerce' turns any corrupted or broken timestamp strings into NaT (Not a Time) values safely
+        combined_df['fetch_timestamp'] = pd.to_datetime(combined_df['fetch_timestamp'], errors='coerce')
+        
+        # Drop any rows that couldn't be parsed so they don't break the rest of the script
+        combined_df.dropna(subset=['fetch_timestamp'], inplace=True)
+
         combined_df.drop_duplicates(subset=['fetch_timestamp', 'ride_name'], keep='last', inplace=True)
 
         # =========================================================================
