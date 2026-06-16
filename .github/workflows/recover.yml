@@ -14,8 +14,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # CRITICAL: Tells Git to retrieve your entire history, not just the latest commit
-
+          fetch-depth: 400  # Pulls the last 400 commits—plenty to cover May, without downloading everything
+          
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
