@@ -1,333 +1,770 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Theme Park Analyst Pro</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        :root { --primary: #2c3e50; --accent: #3498db; --bg: #f4f7f6; }
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--bg); display: flex; flex-direction: column; height: 100vh; }
-        header { background: var(--primary); color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
-        .tabs { display: flex; background: #ddd; padding: 0 2rem; border-bottom: 2px solid #ccc; }
-        .tab { padding: 12px 24px; cursor: pointer; border: none; background: none; font-weight: bold; color: #666; }
-        .tab.active { background: white; color: var(--accent); border-bottom: 3px solid var(--accent); margin-bottom: -2px; }
-        .controls { padding: 15px 2rem; display: flex; gap: 20px; background: white; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        select { padding: 8px; border-radius: 5px; border: 1px solid #ccc; min-width: 200px; cursor: pointer; }
-        .content { flex: 1; padding: 20px; overflow-y: auto; }
-        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; padding: 12px; border-bottom: 2px solid #eee; color: #888; font-size: 0.75rem; text-transform: uppercase; cursor: pointer; user-select: none; position: relative; }
-        th:hover { color: var(--accent); }
-        
-        /* Inline Header Definitions CSS */
-        th[data-tooltip]:hover::after {
-            content: attr(data-tooltip);
-            position: absolute;
-            bottom: 125%;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #333;
-            color: #fff;
-            padding: 6px 10px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            text-transform: none;
-            white-space: normal;
-            width: 220px;
-            z-index: 10;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            font-weight: normal;
-        }
-        
-        /* Status Hover Explanations CSS */
-        .status-badge {
-            cursor: help;
-            border-bottom: 1px dotted #ccc;
-        }
-        .status-badge[data-reason]:hover::after {
-            content: attr(data-reason);
-            position: absolute;
-            background-color: #2c3e50;
-            color: white;
-            padding: 6px 10px;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            margin-left: 10px;
-            z-index: 10;
-            white-space: nowrap;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
-        }
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SoCal Park Waits</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root {
+    color-scheme: light;
+    --bg: #f4f3f0;
+    --surface: #fcfcfb;
+    --surface-2: #f0efec;
+    --border: #e2e0da;
+    --text: #0b0b0b;
+    --text-2: #52514e;
+    --text-3: #7a7974;
+    --accent: #2a78d6;
+    --shorter: #2a78d6;
+    --longer: #d03b3b;
+    --neutral: #8a8984;
+    --good: #0ca30c;
+    --critical: #d03b3b;
+    --band: rgba(138, 137, 132, 0.18);
+    --series-1: #2a78d6;
+    --series-2: #eb6834;
+    --series-3: #1baf7a;
+    --series-4: #6250d6;
+    --heat-0: #f0efec;
+    --heat-1: #cde2fb;
+    --heat-2: #9ec5f4;
+    --heat-3: #6da7ec;
+    --heat-4: #3987e5;
+    --heat-5: #256abf;
+    --heat-6: #184f95;
+    --heat-7: #0d366b;
+}
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        color-scheme: dark;
+        --bg: #121211;
+        --surface: #1a1a19;
+        --surface-2: #262624;
+        --border: #33332f;
+        --text: #f0efec;
+        --text-2: #c3c2b7;
+        --text-3: #8f8e86;
+        --accent: #3987e5;
+        --shorter: #5598e7;
+        --longer: #e66767;
+        --neutral: #8f8e86;
+        --band: rgba(195, 194, 183, 0.14);
+        --series-1: #3987e5;
+        --series-2: #d95926;
+        --series-3: #199e70;
+        --series-4: #9085e9;
+        --heat-0: #262624;
+        --heat-1: #0d366b;
+        --heat-2: #104281;
+        --heat-3: #184f95;
+        --heat-4: #256abf;
+        --heat-5: #3987e5;
+        --heat-6: #6da7ec;
+        --heat-7: #9ec5f4;
+    }
+}
+:root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #121211;
+    --surface: #1a1a19;
+    --surface-2: #262624;
+    --border: #33332f;
+    --text: #f0efec;
+    --text-2: #c3c2b7;
+    --text-3: #8f8e86;
+    --accent: #3987e5;
+    --shorter: #5598e7;
+    --longer: #e66767;
+    --neutral: #8f8e86;
+    --band: rgba(195, 194, 183, 0.14);
+    --series-1: #3987e5;
+    --series-2: #d95926;
+    --series-3: #199e70;
+    --series-4: #9085e9;
+    --heat-0: #262624;
+    --heat-1: #0d366b;
+    --heat-2: #104281;
+    --heat-3: #184f95;
+    --heat-4: #256abf;
+    --heat-5: #3987e5;
+    --heat-6: #6da7ec;
+    --heat-7: #9ec5f4;
+}
 
-        td { padding: 12px; border-bottom: 1px solid #eee; font-size: 0.95rem; }
-        tr:hover { background: #f9f9f9; }
-        .chart-container { height: 500px; position: relative; }
-        .refurb-note { color: #c0392b; font-size: 0.85rem; font-weight: bold; }
-        .status-closed { color: #e67e22; font-size: 0.85rem; font-weight: bold; }
-    </style>
+* { box-sizing: border-box; }
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+button, select, input { font: inherit; color: inherit; }
+.wrap { max-width: 1200px; margin: 0 auto; padding: 0 16px 48px; }
+
+header {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    padding: 16px 0 12px;
+}
+header h1 { font-size: 1.3rem; margin: 0; flex: 1; letter-spacing: -0.01em; white-space: nowrap; }
+#updated { color: var(--text-2); font-size: 0.85rem; }
+#updated.stale { color: var(--critical); }
+.icon-btn {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+    padding: 6px 10px; cursor: pointer; font-size: 0.85rem;
+}
+
+nav.parks {
+    display: flex; gap: 4px; overflow-x: auto; border-bottom: 1px solid var(--border);
+    margin-bottom: 16px; scrollbar-width: none;
+}
+nav.parks button {
+    background: none; border: none; padding: 10px 14px; cursor: pointer; white-space: nowrap;
+    color: var(--text-2); font-weight: 600; border-bottom: 3px solid transparent; margin-bottom: -1px;
+}
+nav.parks button[aria-selected="true"] { color: var(--text); border-bottom-color: var(--accent); }
+
+.card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px;
+}
+.card h2 { font-size: 0.95rem; margin: 0 0 4px; }
+.card .sub { color: var(--text-2); font-size: 0.82rem; margin: 0 0 12px; }
+.section { margin-bottom: 16px; }
+
+.tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+@media (max-width: 520px) { .tiles { gap: 8px; } .tile .value { font-size: 1.4rem; } .card.tile { padding: 12px; } }
+.tile .label { color: var(--text-2); font-size: 0.8rem; }
+.tile .value { font-size: 1.8rem; font-weight: 700; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.tile .note { color: var(--text-2); font-size: 0.8rem; }
+
+.overview { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+.park-card { cursor: pointer; text-align: left; width: 100%; }
+.park-card:hover { border-color: var(--accent); }
+.park-card h2 { font-size: 1.1rem; }
+.park-card .big { font-size: 2.4rem; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.park-card dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 12px 0 0; font-size: 0.85rem; }
+.park-card dt { color: var(--text-2); }
+.park-card dd { margin: 0; }
+
+.two-col { display: grid; grid-template-columns: 1fr 2fr; gap: 16px; }
+@media (max-width: 860px) { .two-col { grid-template-columns: 1fr; } }
+
+.now-list { list-style: none; margin: 0; padding: 0; }
+.now-list li {
+    display: flex; justify-content: space-between; gap: 8px; padding: 8px 0;
+    border-top: 1px solid var(--border); cursor: pointer;
+}
+.now-list li:first-child { border-top: none; }
+.now-list .name { font-weight: 600; }
+.now-list .meta { color: var(--text-2); font-size: 0.8rem; }
+.now-list .num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+.chart-box { position: relative; height: 280px; }
+.chart-box.small { height: 220px; }
+
+.controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+.controls select, .controls input[type="search"] {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 7px 10px;
+}
+.controls input[type="search"] { flex: 1; min-width: 160px; }
+.controls label { display: flex; gap: 6px; align-items: center; font-size: 0.85rem; color: var(--text-2); }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+.ride {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px;
+    cursor: pointer; display: flex; flex-direction: column; gap: 6px; text-align: left;
+}
+.ride:hover { border-color: var(--accent); }
+.ride .top { display: flex; justify-content: space-between; gap: 8px; align-items: flex-start; }
+.ride .name { font-weight: 600; line-height: 1.25; }
+.ride .land { color: var(--text-3); font-size: 0.78rem; }
+.ride .wait { font-size: 1.6rem; font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.ride .wait small { font-size: 0.8rem; font-weight: 500; color: var(--text-2); }
+.delta { font-size: 0.8rem; font-weight: 600; }
+.delta.shorter { color: var(--shorter); }
+.delta.longer { color: var(--longer); }
+.delta.usual { color: var(--text-2); font-weight: 500; }
+.ride .facts { display: flex; gap: 12px; flex-wrap: wrap; color: var(--text-2); font-size: 0.78rem; }
+.ride.inactive .wait { color: var(--text-3); }
+.pin {
+    background: none; border: 1px solid var(--border); border-radius: 6px; font-size: 0.72rem;
+    padding: 2px 6px; cursor: pointer; color: var(--text-2); white-space: nowrap;
+}
+.pin[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+
+.badge {
+    display: inline-flex; gap: 4px; align-items: center; font-size: 0.75rem; font-weight: 600;
+    padding: 2px 8px; border-radius: 999px; background: var(--surface-2); color: var(--text-2);
+}
+.badge.down { color: var(--critical); }
+.badge.open { color: var(--good); }
+
+svg.spark { width: 100%; height: 34px; display: block; }
+svg.spark .line { fill: none; stroke: var(--series-1); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+svg.spark .base { stroke: var(--border); stroke-width: 1; vector-effect: non-scaling-stroke; }
+svg.spark .typ { fill: none; stroke: var(--neutral); stroke-width: 1.5; stroke-dasharray: 3 3; vector-effect: non-scaling-stroke; }
+
+.empty { color: var(--text-2); padding: 24px; text-align: center; }
+
+dialog {
+    border: 1px solid var(--border); border-radius: 14px; padding: 0; background: var(--surface); color: var(--text);
+    width: min(860px, calc(100vw - 24px)); max-height: calc(100vh - 32px);
+}
+dialog::backdrop { background: rgba(0, 0, 0, 0.45); }
+.dlg-head { display: flex; justify-content: space-between; gap: 12px; padding: 16px 16px 0; }
+.dlg-head h2 { margin: 0; font-size: 1.2rem; }
+.dlg-body { padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+.facts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; }
+.facts-grid div { background: var(--surface-2); border-radius: 8px; padding: 8px 10px; }
+.facts-grid b { display: block; font-size: 1.15rem; font-variant-numeric: tabular-nums; }
+.facts-grid span { color: var(--text-2); font-size: 0.78rem; }
+
+.heat-scroll { overflow-x: auto; }
+table.heat { border-collapse: separate; border-spacing: 2px; font-size: 0.72rem; font-variant-numeric: tabular-nums; }
+table.heat th { color: var(--text-2); font-weight: 500; padding: 0 4px; }
+table.heat td {
+    width: 30px; min-width: 30px; height: 26px; text-align: center; border-radius: 4px;
+    background: var(--heat-0); color: var(--text-3);
+}
+table.heat td.today { outline: 2px solid var(--text); outline-offset: -2px; }
+.heat-legend { display: flex; gap: 2px; align-items: center; font-size: 0.72rem; color: var(--text-2); margin-top: 8px; }
+.heat-legend i { width: 22px; height: 10px; border-radius: 2px; display: inline-block; }
+
+.foot { color: var(--text-3); font-size: 0.78rem; margin-top: 24px; }
+.foot a { color: inherit; }
+</style>
 </head>
 <body>
-
-<header>
-    <h2 style="margin:0">🎢 Theme Park Command Center</h2>
-    <div id="lastUpdate" style="font-size: 0.85rem; opacity: 0.8;">Loading...</div>
-</header>
-
-<div class="tabs">
-    <button class="tab active" onclick="switchTab('master')">Attraction Master List</button>
-    <button class="tab" onclick="switchTab('trends')">7-Day Trends</button>
+<div class="wrap">
+    <header>
+        <h1>SoCal Park Waits</h1>
+        <span id="updated" aria-live="polite">Loading…</span>
+        <button class="icon-btn" id="themeBtn" type="button" title="Switch theme">Auto theme</button>
+    </header>
+    <nav class="parks" id="parkTabs" role="tablist"></nav>
+    <main id="main"><p class="empty">Loading wait times…</p></main>
+    <p class="foot">
+        Data from <a href="https://queue-times.com" rel="noopener">Queue-Times.com</a>, polled every 5 minutes.
+        “Usual” = average wait for that ride at this hour on this weekday over the last 8 weeks.
+        Uptime counts only snapshots when the park is operating.
+    </p>
 </div>
 
-<div class="controls">
-    <div><label><b>Park:</b> </label><select id="parkFilter" onchange="updateLandOptions()"></select></div>
-    <div><label><b>Land:</b> </label><select id="landFilter" onchange="processData()"></select></div>
-</div>
+<dialog id="rideDlg" aria-labelledby="dlgTitle">
+    <div class="dlg-head">
+        <div><h2 id="dlgTitle"></h2><div id="dlgSub" class="sub"></div></div>
+        <button class="icon-btn" type="button" id="dlgClose" aria-label="Close">✕</button>
+    </div>
+    <div class="dlg-body" id="dlgBody"></div>
+</dialog>
 
-<div class="content">
-    <div id="masterView" class="tab-content">
+<script>
+const REFRESH_MS = 5 * 60 * 1000;
+const STALE_MIN = 30;
+const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const SHORT = {
+    'Disneyland': 'Disneyland',
+    'Disney California Adventure': 'California Adventure',
+    'Universal Studios Hollywood': 'Universal Hollywood',
+};
+
+let live = null;
+let hist = { parks: {} };
+let state = { park: 'all', land: 'ALL', sort: 'wait', q: '', hideClosed: false };
+let pinned = {};       // park -> [ride names] shown on the trend chart
+let charts = {};
+
+// ---------- small utilities ----------
+const $ = sel => document.querySelector(sel);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const cssVar = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+const slotLabel = (i, mins) => { const m = i * mins; return `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`; };
+const fmtHour = h => { const ap = h < 12 ? 'am' : 'pm'; const hh = h % 12 || 12; return `${hh}${ap}`; };
+const fmtSlot = (i, mins) => { const m = i * mins; return m % 60 ? fmtClock(slotLabel(i, mins)) : fmtHour(m / 60); };
+const fmtClock = hhmm => { const [h, m] = hhmm.split(':').map(Number); return `${h % 12 || 12}:${String(m).padStart(2, '0')}${h < 12 ? 'am' : 'pm'}`; };
+
+function store(key, value) {
+    try {
+        if (value === undefined) return JSON.parse(localStorage.getItem(key));
+        localStorage.setItem(key, JSON.stringify(value));
+    } catch (e) { return null; }
+}
+
+// Parks' snapshot time is Pacific; derive weekday/hour/slot from the string itself.
+function parkClock(park) {
+    const t = live.parks[park].updated;               // "YYYY-MM-DDTHH:MM:SS"
+    const d = new Date(t.slice(0, 10) + 'T00:00:00Z');
+    const h = Number(t.slice(11, 13)), m = Number(t.slice(14, 16));
+    return { dow: (d.getUTCDay() + 6) % 7, hour: h, slot: Math.floor((h * 60 + m) / live.slotMinutes) };
+}
+
+// How the posted wait compares with the usual wait for this hour.
+function compare(r) {
+    if (r.status !== 'open' || r.typical == null || r.wait == null) return null;
+    const diff = r.wait - r.typical;
+    if (r.typical < 5 && r.wait < 10) return { cls: 'usual', text: 'about usual', diff };
+    if (Math.abs(diff) < 5 || Math.abs(diff) <= r.typical * 0.15) return { cls: 'usual', text: `about usual (${r.typical}m)`, diff };
+    return diff < 0
+        ? { cls: 'shorter', text: `↓ ${-diff}m shorter than usual`, diff }
+        : { cls: 'longer', text: `↑ ${diff}m longer than usual`, diff };
+}
+
+function statusBadge(r) {
+    if (r.status === 'down') {
+        let since = '';
+        if (r.downSince === 'open') since = ' · not opened yet today';
+        else if (r.downSince) since = ` · since ${fmtClock(r.downSince)}`;
+        return `<span class="badge down">⚠ Down${since}</span>`;
+    }
+    if (r.status === 'refurb') return '<span class="badge">🛠 Not open this week</span>';
+    if (r.status === 'closed') return '<span class="badge">☾ Not running now</span>';
+    return '';
+}
+
+function avgOpenWait(rides) {
+    const w = rides.filter(r => r.status === 'open' && r.wait > 0).map(r => r.wait);
+    return w.length ? Math.round(w.reduce((a, b) => a + b, 0) / w.length) : null;
+}
+
+// Rides worth doing now: open, normally busy, and furthest below their usual wait.
+function worthItNow(rides) {
+    return rides
+        .filter(r => r.status === 'open' && r.typical >= 10 && r.wait != null && r.wait < r.typical)
+        .map(r => ({ r, ratio: r.wait / r.typical }))
+        .sort((a, b) => a.ratio - b.ratio)
+        .slice(0, 6)
+        .map(x => x.r);
+}
+
+// ---------- SVG sparkline ----------
+function sparkSvg(values, typicalLine, range) {
+    const [lo, hi] = range;
+    const n = hi - lo + 1;
+    const vals = values.slice(lo, hi + 1);
+    const typ = typicalLine ? typicalLine.slice(lo, hi + 1) : [];
+    const max = Math.max(10, ...vals.filter(v => v != null), ...typ.filter(v => v != null));
+    const H = 30, pad = 2;
+    const pt = (v, i) => `${(i / Math.max(1, n - 1) * 100).toFixed(2)},${(H + pad - v / max * H).toFixed(2)}`;
+    const path = arr => {
+        let d = '', pen = false;
+        arr.forEach((v, i) => {
+            if (v == null) { pen = false; return; }
+            d += (pen ? 'L' : 'M') + pt(v, i);
+            pen = true;
+        });
+        return d;
+    };
+    return `<svg class="spark" viewBox="0 0 100 ${H + pad * 2}" preserveAspectRatio="none" aria-hidden="true">
+        <line class="base" x1="0" x2="100" y1="${H + pad}" y2="${H + pad}"/>
+        ${typ.length ? `<path class="typ" d="${path(typ)}"/>` : ''}
+        <path class="line" d="${path(vals)}"/>
+    </svg>`;
+}
+
+// Slot range covering the park's operating day (from the typical curve and today).
+function dayRange(park) {
+    const band = hist.parks[park]?.band?.p50 || [];
+    const today = live.parks[park].today || [];
+    let lo = Infinity, hi = -Infinity;
+    [band, today].forEach(a => a.forEach((v, i) => { if (v != null) { lo = Math.min(lo, i); hi = Math.max(hi, i); } }));
+    if (!isFinite(lo)) return [32, 92];
+    return [lo, hi];
+}
+
+// ---------- rendering ----------
+function renderTabs() {
+    const parks = Object.keys(live.parks);
+    const tabs = [['all', 'All parks'], ...parks.map(p => [p, SHORT[p] || p])];
+    $('#parkTabs').innerHTML = tabs.map(([k, label]) =>
+        `<button role="tab" type="button" data-park="${esc(k)}" aria-selected="${state.park === k}">${esc(label)}</button>`
+    ).join('');
+}
+
+function render() {
+    if (!live) return;
+    renderTabs();
+    Object.values(charts).forEach(c => c.destroy());
+    charts = {};
+    if (state.park === 'all' || !live.parks[state.park]) {
+        state.park = 'all';
+        renderOverview();
+    } else {
+        renderPark(state.park);
+    }
+}
+
+function renderOverview() {
+    const cards = Object.entries(live.parks).map(([park, p]) => {
+        const rides = p.rides;
+        const open = rides.filter(r => r.status === 'open').length;
+        const down = rides.filter(r => r.status === 'down').length;
+        const avg = avgOpenWait(rides);
+        const { slot } = parkClock(park);
+        const usual = hist.parks[park]?.band?.p50?.[slot];
+        const longest = rides.filter(r => r.status === 'open').sort((a, b) => b.wait - a.wait)[0];
+        const deal = worthItNow(rides)[0];
+        const range = dayRange(park);
+        let headline = `<div class="big">${p.operating && avg != null ? avg + '<small style="font-size:1rem"> min avg</small>' : 'Closed'}</div>`;
+        let vs = '';
+        if (p.operating && avg != null && usual != null) {
+            const d = avg - usual;
+            vs = Math.abs(d) < 3 ? `<span class="delta usual">about usual for this time</span>`
+                : `<span class="delta ${d < 0 ? 'shorter' : 'longer'}">${d < 0 ? '↓' : '↑'} ${Math.abs(d)}m vs usual ${usual}m</span>`;
+        }
+        return `<button type="button" class="card park-card" data-park="${esc(park)}">
+            <h2>${esc(park)}</h2>
+            ${headline}${vs}
+            ${sparkSvg(p.today || [], hist.parks[park]?.band?.p50, range)}
+            <dl>
+                <dt>Rides</dt><dd>${open} open${down ? ` · <span class="badge down">⚠ ${down} down</span>` : ''}</dd>
+                ${longest ? `<dt>Longest</dt><dd>${esc(longest.name)} · ${longest.wait}m</dd>` : ''}
+                ${deal ? `<dt>Best now</dt><dd>${esc(deal.name)} · ${deal.wait}m (usually ${deal.typical}m)</dd>` : ''}
+            </dl>
+        </button>`;
+    }).join('');
+    $('#main').innerHTML = `<div class="overview">${cards}</div>
+        <p class="sub" style="margin-top:12px">Line: average posted wait across open rides today. Dashed: a typical day.</p>`;
+}
+
+function renderPark(park) {
+    const p = live.parks[park];
+    const rides = p.rides;
+    const { slot } = parkClock(park);
+    const band = hist.parks[park]?.band;
+    const avg = avgOpenWait(rides);
+    const usual = band?.p50?.[slot];
+    const open = rides.filter(r => r.status === 'open').length;
+    const down = rides.filter(r => r.status === 'down');
+    const worth = worthItNow(rides);
+    const lands = [...new Set(rides.map(r => r.land))].sort();
+    if (state.land !== 'ALL' && !lands.includes(state.land)) state.land = 'ALL';
+
+    const avgNote = avg != null && usual != null
+        ? (Math.abs(avg - usual) < 3 ? 'about usual for this time' : `usually ${usual}m at this time`)
+        : '';
+
+    $('#main').innerHTML = `
+    <div class="tiles section">
+        <div class="card tile"><div class="label">Average wait now</div>
+            <div class="value">${p.operating && avg != null ? avg + 'm' : '—'}</div><div class="note">${p.operating ? avgNote : 'Park closed'}</div></div>
+        <div class="card tile"><div class="label">Rides open</div>
+            <div class="value">${open}<small style="font-size:1rem;color:var(--text-2)"> / ${rides.length}</small></div></div>
+        <div class="card tile"><div class="label">Rides down</div>
+            <div class="value">${p.operating ? down.length : '—'}</div>
+            <div class="note">${p.operating && down.length ? esc(down.slice(0, 2).map(r => r.name).join(', ')) + (down.length > 2 ? '…' : '') : ''}</div></div>
+    </div>
+
+    <div class="two-col section">
         <div class="card">
-            <table id="masterTable">
-                <thead>
-                    <tr>
-                        <th onclick="sortTable(0)">Ride Name ↕</th>
-                        <th onclick="sortTable(1)">Wait ↕</th>
-                        <th onclick="sortTable(2)" data-tooltip="Efficiency = (Ride Duration / (Wait Time + Ride Duration)) * 100. Higher % means less time spent waiting relative to your ride experience.">Efficiency ↕</th>
-                        <th onclick="sortTable(3)" data-tooltip="7-Day Uptime = (Total Open Logs / Total Logs Collected) * 100. Measures operational consistency over the past week.">7-Day Uptime ↕</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
+            <h2>Worth riding now</h2>
+            <p class="sub">Popular rides furthest below their usual wait for this hour.</p>
+            ${worth.length ? `<ul class="now-list">${worth.map(r => `
+                <li data-ride="${esc(r.name)}"><div><div class="name">${esc(r.name)}</div><div class="meta">${esc(r.land)}</div></div>
+                <div class="num"><b>${r.wait}m</b><div class="meta">usually ${r.typical}m</div></div></li>`).join('')}</ul>`
+              : `<p class="empty">${p.operating ? 'Nothing is running below its usual wait right now.' : 'The park is closed.'}</p>`}
+        </div>
+        <div class="card">
+            <h2>Today vs a typical day</h2>
+            <p class="sub">Average posted wait across open rides. Shaded: middle half of days over the last 4 weeks. Pin rides below to add them.</p>
+            <div class="chart-box"><canvas id="parkChart" role="img" aria-label="Park-wide average wait today compared with a typical day"></canvas></div>
         </div>
     </div>
 
-    <div id="trendsView" class="tab-content" style="display:none">
-        <div class="card chart-container"><canvas id="trendChart"></canvas></div>
+    <div class="controls">
+        <select id="landSel" aria-label="Land"><option value="ALL">All lands</option>${lands.map(l => `<option ${l === state.land ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select>
+        <select id="sortSel" aria-label="Sort by">
+            ${[['wait', 'Longest wait'], ['shortest', 'Shortest wait'], ['vs', 'Best vs usual'], ['eff', 'Efficiency'], ['uptime', 'Least reliable'], ['name', 'Name']]
+                .map(([k, l]) => `<option value="${k}" ${state.sort === k ? 'selected' : ''}>${l}</option>`).join('')}
+        </select>
+        <input type="search" id="searchBox" placeholder="Search rides" value="${esc(state.q)}" aria-label="Search rides">
+        <label><input type="checkbox" id="hideClosed" ${state.hideClosed ? 'checked' : ''}> Open only</label>
     </div>
-</div>
+    <div class="grid" id="rideGrid"></div>`;
 
-<script>
-const rideDurations = {"Adventureland Treehouse inspired by Walt Disney’s Swiss Family Robinson": 15.0, "Indiana Jones™ Adventure": 3.4, "Jungle Cruise": 8.0, "Walt Disney's Enchanted Tiki Room": 15.6, "Davy Crockett's Explorer Canoes": 10.0, "The Many Adventures of Winnie the Pooh": 3.0, "Tiana's Bayou Adventure": 11.0, "it's a small world": 15.0, "Alice in Wonderland": 3.6, "Casey Jr. Circus Train": 3.6, "Dumbo the Flying Elephant": 1.5, "King Arthur Carrousel": 2.0, "Mad Tea Party": 1.5, "Matterhorn Bobsleds": 2.0, "Mr. Toad's Wild Ride": 2.0, "Peter Pan's Flight": 2.3, "Pinocchio's Daring Journey": 3.0, "Snow White's Enchanted Wish": 2.0, "Storybook Land Canal Boats": 6.0, "Big Thunder Mountain Railroad": 3.3, "Mark Twain Riverboat": 14.0, "Sailing Ship Columbia": 12.0, "Disneyland Railroad": 22.0, "Great Moments with Mr. Lincoln": 16.0, "Chip 'n' Dale's GADGETcoaster": 0.75, "Mickey & Minnie's Runaway Railway": 5.0, "Haunted Mansion": 9.0, "Pirates of the Caribbean": 16.0, "Millennium Falcon: Smugglers Run": 4.5, "Star Wars: Rise of the Resistance": 18.0, "Astro Orbitor": 1.5, "Autopia": 5.1, "Disneyland Monorail": 15.0, "Finding Nemo Submarine Voyage": 14.0, "Space Mountain": 3.0, "Star Tours – The Adventures Continue": 5.0, "Guardians of the Galaxy – Mission: BREAKOUT!": 2.1, "WEB SLINGERS: A Spider-Man Adventure": 3.4, "Luigi's Rollickin' Roadsters": 1.0, "Mater's Junkyard Jamboree": 1.5, "Radiator Springs Racers": 4.0, "Grizzly River Run": 6.0, "Soarin' Around the World": 4.75, "Mickey's PhilharMagic": 12.0, "Monsters, Inc. Mike & Sulley to the Rescue!": 4.1, "Turtle Talk with Crush": 17.0, "Golden Zephyr": 1.5, "Goofy's Sky School": 1.75, "The Little Mermaid ~ Ariel's Undersea Adventure": 7.0, "Incredicoaster": 1.3, "Inside Out Emotional Whirlwind": 1.5, "Jessie's Critter Carousel": 2.0, "Jumpin' Jellyfish": 1.5, "Pixar Pal-A-Round – Non-Swinging": 9.0, "Pixar Pal-A-Round – Swinging": 9.0, "Toy Story Midway Mania!": 8.0, "Jurassic World — The Ride": 9.5, "Revenge of the Mummy – The Ride": 2.0, "Despicable Me Minion Mayhem": 4.0, "Silly Swirly": 2.0, "The Secret Life of Pets: Off the Leash": 4.0, "The Simpsons Ride™": 4.5, "Mario Kart™: Bowser’s Challenge": 4.0, "Flight of the Hippogriff™": 1.0, "Harry Potter and the Forbidden Journey™": 4.0, "TRANSFORMERS™: The Ride-3D": 4.5, "Studio Tour": 60.0};
+    renderGrid(park);
+    renderParkChart(park);
+}
 
-function norm(s) { return (s||"").toLowerCase().replace(/[^\w]/g, '').trim(); }
-const normMap = {}; Object.keys(rideDurations).forEach(k => normMap[norm(k)] = rideDurations[k]);
+function sortRides(list) {
+    const statusRank = r => ({ open: 0, down: 1, closed: 2, refurb: 3 }[r.status]);
+    const by = {
+        wait: (a, b) => (b.wait ?? -1) - (a.wait ?? -1),
+        shortest: (a, b) => (a.wait ?? 1e9) - (b.wait ?? 1e9),
+        vs: (a, b) => (compare(a)?.diff ?? 1e9) - (compare(b)?.diff ?? 1e9),
+        eff: (a, b) => (b.eff ?? -1) - (a.eff ?? -1),
+        uptime: (a, b) => (a.uptime ?? 1e9) - (b.uptime ?? 1e9),
+        name: (a, b) => a.name.localeCompare(b.name),
+    }[state.sort];
+    return list.sort((a, b) => (state.sort === 'uptime' || state.sort === 'name' ? 0 : statusRank(a) - statusRank(b)) || by(a, b) || a.name.localeCompare(b.name));
+}
 
-let globalData = [];
-let trendChart = null;
-let maxFileDate = new Date(); 
+function renderGrid(park) {
+    const p = live.parks[park];
+    const q = state.q.toLowerCase();
+    const range = dayRange(park);
+    const rideHist = hist.parks[park]?.rides || {};
+    const pins = pinned[park] || [];
+    const list = sortRides(p.rides.filter(r =>
+        (state.land === 'ALL' || r.land === state.land) &&
+        (!q || r.name.toLowerCase().includes(q)) &&
+        (!state.hideClosed || r.status === 'open')));
 
-Papa.parse(`./wait_times.csv?v=${Date.now()}`, {
-    download: true, header: true, skipEmptyLines: true,
-    complete: function(results) {
-        if (!results.data || results.data.length === 0) {
-            document.getElementById('lastUpdate').innerText = "Error: CSV data is empty.";
-            return;
-        }
+    $('#rideGrid').innerHTML = list.length ? list.map(r => {
+        const c = compare(r);
+        const active = r.status === 'open';
+        const facts = [];
+        if (r.uptime != null) facts.push(`Uptime ${r.uptime}%`);
+        if (r.eff != null) facts.push(`Efficiency ${r.eff}%`);
+        if (r.best) facts.push(`Best ~${fmtHour(r.best.hour)}`);
+        const isPinned = pins.includes(r.name);
+        return `<div class="ride ${active ? '' : 'inactive'}" data-ride="${esc(r.name)}" tabindex="0" role="button">
+            <div class="top">
+                <div><div class="name">${esc(r.name)}</div><div class="land">${esc(r.land)}</div></div>
+                <div class="wait">${active ? `${r.wait}<small> min</small>` : '—'}</div>
+            </div>
+            ${c ? `<span class="delta ${c.cls}">${c.text}</span>` : statusBadge(r)}
+            ${sparkSvg(r.spark || [], rideHist[r.name]?.profile, range)}
+            <div class="facts">${facts.map(esc).join('<span>·</span>')}
+                <button type="button" class="pin" data-pin="${esc(r.name)}" aria-pressed="${isPinned}" style="margin-left:auto">${isPinned ? '✓ On chart' : '＋ Chart'}</button>
+            </div>
+        </div>`;
+    }).join('') : '<p class="empty">No rides match.</p>';
+}
 
-        globalData = results.data.map(row => {
-            return { 
-                ts: row['fetch_timestamp'], 
-                pk: row['park_name'], 
-                ld: row['land'], 
-                rd: row['ride_name'], 
-                wt: parseInt(row['wait_time']) || 0, 
-                op: String(row['is_open']).toLowerCase() === "true" || row['is_open'] === true 
-            };
-        }).filter(d => d.pk && d.ts && d.pk !== "park_name");
+function lineDataset(label, data, color, extra = {}) {
+    return { label, data, borderColor: color, backgroundColor: color, borderWidth: 2, pointRadius: 0, pointHoverRadius: 4, tension: 0.3, spanGaps: false, ...extra };
+}
 
-        const timestamps = globalData.map(d => new Date(d.ts).getTime()).filter(t => !isNaN(t));
-        if (timestamps.length > 0) {
-            maxFileDate = new Date(Math.max(...timestamps));
-        }
+function chartOptions(yTitle) {
+    const grid = cssVar('--border'), text = cssVar('--text-2');
+    return {
+        responsive: true, maintainAspectRatio: false, animation: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+            legend: { position: 'bottom', labels: { color: text, boxWidth: 12, boxHeight: 2, filter: i => !i.text.startsWith('_') } },
+            tooltip: { filter: i => !i.dataset.label.startsWith('_') && i.raw != null, callbacks: { label: i => ` ${i.dataset.label}: ${i.raw}m` } },
+        },
+        scales: {
+            x: { grid: { display: false }, ticks: { color: text, autoSkip: false, maxRotation: 0,
+                // Label whole hours only: every 3h on wide charts, every 6h on phones.
+                callback(v) { const l = this.getLabelForValue(v), h = parseInt(l, 10) % 12;
+                    const every = this.chart.width < 500 ? 6 : 3;
+                    return /^\d+(am|pm)$/.test(l) && h % every === 0 ? l : null; } } },
+            y: { beginAtZero: true, grid: { color: grid }, border: { display: false }, ticks: { color: text }, title: { display: true, text: yTitle, color: text } },
+        },
+    };
+}
 
-        const parks = [...new Set(globalData.map(d => d.pk))].filter(p => p && p.length > 3);
-        const pSel = document.getElementById('parkFilter');
-        pSel.innerHTML = ""; 
-        parks.forEach(p => pSel.add(new Option(p, p)));
-        
-        document.getElementById('lastUpdate').innerText = "Last Data: " + globalData[globalData.length-1].ts;
-        updateLandOptions();
+function renderParkChart(park) {
+    if (!window.Chart) return;
+    const [lo, hi] = dayRange(park);
+    const mins = live.slotMinutes;
+    const labels = []; for (let i = lo; i <= hi; i++) labels.push(fmtSlot(i, mins));
+    const cut = a => (a || []).slice(lo, hi + 1);
+    const band = hist.parks[park]?.band || {};
+    const ds = [
+        lineDataset('_p75', cut(band.p75), 'transparent', { pointHoverRadius: 0, fill: '+1', backgroundColor: cssVar('--band'), borderWidth: 0 }),
+        lineDataset('_p25', cut(band.p25), 'transparent', { pointHoverRadius: 0, borderWidth: 0 }),
+        lineDataset('Typical day', cut(band.p50), cssVar('--neutral'), { borderDash: [5, 4], borderWidth: 1.5 }),
+        lineDataset('Today (park average)', cut(live.parks[park].today), cssVar('--series-1')),
+    ];
+    const colors = ['--series-2', '--series-3', '--series-4'];
+    (pinned[park] || []).forEach((name, i) => {
+        const r = live.parks[park].rides.find(x => x.name === name);
+        if (r) ds.push(lineDataset(name, cut(r.spark), cssVar(colors[i])));
+    });
+    charts.park = new Chart($('#parkChart'), { type: 'line', data: { labels, datasets: ds }, options: chartOptions('Minutes') });
+}
+
+// ---------- ride detail ----------
+function openRide(park, name) {
+    const r = live.parks[park]?.rides.find(x => x.name === name);
+    if (!r) return;
+    const h = hist.parks[park]?.rides?.[name] || {};
+    const { dow, hour } = parkClock(park);
+    const c = compare(r);
+
+    $('#dlgTitle').textContent = r.name;
+    $('#dlgSub').textContent = `${r.land} · ${park}`;
+    const facts = [
+        ['Now', r.status === 'open' ? `${r.wait}m` : { down: 'Down', refurb: 'Not open', closed: 'Not running' }[r.status]],
+        ['Usual at this hour', r.typical != null ? `${r.typical}m` : '—'],
+        ['Best time', r.best ? `${fmtHour(r.best.hour)} · ~${r.best.wait}m` : '—'],
+        ['8-week average', h.avg != null ? `${h.avg}m` : '—'],
+        ['7-day uptime', r.uptime != null ? `${r.uptime}%` : '—'],
+        ['Efficiency', r.eff != null ? `${r.eff}%` : '—'],
+        ['Ride length', r.duration ? `${r.duration} min` : '—'],
+    ];
+    $('#dlgBody').innerHTML = `
+        <div>${c ? `<span class="delta ${c.cls}">${c.text}</span>` : statusBadge(r)}</div>
+        <div class="facts-grid">${facts.map(([k, v]) => `<div><b>${esc(v)}</b><span>${esc(k)}</span></div>`).join('')}</div>
+        <div>
+            <h2 style="font-size:.95rem;margin:0 0 4px">Today vs last 7 days</h2>
+            <div class="chart-box small"><canvas id="rideChart" role="img" aria-label="Wait today compared with the 7-day average"></canvas></div>
+        </div>
+        <div>
+            <h2 style="font-size:.95rem;margin:0 0 4px">When is it shortest?</h2>
+            <p class="sub">Average posted wait by weekday and hour, last ${hist.weeks || 8} weeks. Outlined: now.</p>
+            ${heatmapHtml(h.heat, dow, hour)}
+        </div>`;
+
+    const dlg = $('#rideDlg');
+    if (!dlg.open) dlg.showModal();
+    location.hash = `park=${encodeURIComponent(park)}&ride=${encodeURIComponent(name)}`;
+
+    if (charts.ride) charts.ride.destroy();
+    if (window.Chart) {
+        const [lo, hi] = dayRange(park);
+        const labels = []; for (let i = lo; i <= hi; i++) labels.push(fmtSlot(i, live.slotMinutes));
+        charts.ride = new Chart($('#rideChart'), {
+            type: 'line',
+            data: { labels, datasets: [
+                lineDataset('7-day average', (h.profile || []).slice(lo, hi + 1), cssVar('--neutral'), { borderDash: [5, 4], borderWidth: 1.5 }),
+                lineDataset('Today', (r.spark || []).slice(lo, hi + 1), cssVar('--series-1')),
+            ] },
+            options: chartOptions('Minutes'),
+        });
     }
+}
+
+function heatmapHtml(heat, nowDow, nowHour) {
+    if (!heat) return '<p class="empty">Not enough history yet.</p>';
+    const hours = [];
+    for (let hr = 0; hr < 24; hr++) if (heat.some(row => row[hr] != null)) hours.push(hr);
+    if (!hours.length) return '<p class="empty">Not enough history yet.</p>';
+    const all = heat.flat().filter(v => v != null);
+    const max = Math.max(10, ...all);
+    const step = v => v == null ? 0 : Math.min(7, 1 + Math.floor(v / max * 6.999));
+    const ink = s => s >= 5 ? '#ffffff' : 'var(--text)';
+    const head = `<tr><th></th>${hours.map(hr => `<th>${fmtHour(hr)}</th>`).join('')}</tr>`;
+    const rows = heat.map((row, d) => `<tr><th>${DAYS[d]}</th>${hours.map(hr => {
+        const v = row[hr], s = step(v);
+        const isNow = d === nowDow && hr === nowHour;
+        return `<td class="${isNow ? 'today' : ''}" style="background:var(--heat-${s});color:${v == null ? 'var(--text-3)' : ink(s)}" title="${DAYS[d]} ${fmtHour(hr)}: ${v == null ? 'no data' : v + ' min'}">${v == null ? '' : v}</td>`;
+    }).join('')}</tr>`).join('');
+    const legend = [1, 2, 3, 4, 5, 6, 7].map(s => `<i style="background:var(--heat-${s})"></i>`).join('');
+    return `<div class="heat-scroll"><table class="heat">${head}${rows}</table></div>
+        <div class="heat-legend">Shorter ${legend} Longer (max ${max}m)</div>`;
+}
+
+// ---------- data loading ----------
+async function fetchJson(url) {
+    const res = await fetch(`${url}?v=${Date.now()}`, { cache: 'no-store' });
+    if (!res.ok) throw new Error(`${url}: ${res.status}`);
+    return res.json();
+}
+
+async function loadLive() {
+    try {
+        live = await fetchJson('data/live.json');
+        updateClock();
+        render();
+        if ($('#rideDlg').open) {
+            const m = parseHash();
+            if (m.ride) openRide(m.park, m.ride);
+        }
+    } catch (e) {
+        $('#updated').textContent = 'Could not load data';
+        if (!live) $('#main').innerHTML = `<p class="empty">Could not load wait times (${esc(e.message)}).</p>`;
+    }
+}
+
+async function loadHistory() {
+    try { hist = await fetchJson('data/history.json'); } catch (e) { hist = { parks: {} }; }
+}
+
+function updateClock() {
+    if (!live) return;
+    const mins = Math.round((Date.now() - new Date(live.generated).getTime()) / 60000);
+    const el = $('#updated');
+    el.textContent = mins < 1 ? 'Updated just now' : mins < 90 ? `Updated ${mins} min ago` : `Updated ${Math.round(mins / 60)} h ago`;
+    el.classList.toggle('stale', mins > STALE_MIN);
+}
+
+// ---------- routing, theme, events ----------
+function parseHash() {
+    const p = new URLSearchParams(location.hash.slice(1));
+    return { park: p.get('park') || 'all', ride: p.get('ride') };
+}
+
+function setPark(park) {
+    state.park = park;
+    state.land = 'ALL';
+    window.history.replaceState(null, '', park === 'all' ? '#' : `#park=${encodeURIComponent(park)}`);
+    store('park', park);
+    render();
+}
+
+const THEMES = ['auto', 'light', 'dark'];
+function applyTheme(t) {
+    if (t === 'auto') document.documentElement.removeAttribute('data-theme');
+    else document.documentElement.setAttribute('data-theme', t);
+    $('#themeBtn').textContent = { auto: 'Auto theme', light: 'Light', dark: 'Dark' }[t];
+    $('#themeBtn').title = `Theme: ${t} (click to change)`;
+}
+
+document.addEventListener('click', e => {
+    const tab = e.target.closest('[data-park]');
+    if (tab) return setPark(tab.dataset.park);
+    const pin = e.target.closest('[data-pin]');
+    if (pin) {
+        const list = pinned[state.park] = pinned[state.park] || [];
+        const i = list.indexOf(pin.dataset.pin);
+        if (i >= 0) list.splice(i, 1);
+        else { list.push(pin.dataset.pin); if (list.length > 3) list.shift(); }
+        store('pinned', pinned);
+        return render();
+    }
+    const ride = e.target.closest('[data-ride]');
+    if (ride) openRide(state.park, ride.dataset.ride);
 });
+document.addEventListener('keydown', e => {
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('.ride')) { e.preventDefault(); openRide(state.park, e.target.dataset.ride); }
+});
+document.addEventListener('change', e => {
+    if (e.target.id === 'landSel') state.land = e.target.value;
+    else if (e.target.id === 'sortSel') { state.sort = e.target.value; store('sort', state.sort); }
+    else if (e.target.id === 'hideClosed') state.hideClosed = e.target.checked;
+    else return;
+    renderGrid(state.park);
+});
+document.addEventListener('input', e => {
+    if (e.target.id === 'searchBox') { state.q = e.target.value; renderGrid(state.park); }
+});
+$('#dlgClose').addEventListener('click', () => $('#rideDlg').close());
+$('#rideDlg').addEventListener('click', e => { if (e.target.id === 'rideDlg') e.target.close(); });
+$('#rideDlg').addEventListener('close', () => {
+    if (charts.ride) { charts.ride.destroy(); delete charts.ride; }
+    window.history.replaceState(null, '', state.park === 'all' ? '#' : `#park=${encodeURIComponent(state.park)}`);
+});
+$('#themeBtn').addEventListener('click', () => {
+    const cur = store('theme') || 'auto';
+    const next = THEMES[(THEMES.indexOf(cur) + 1) % THEMES.length];
+    store('theme', next);
+    applyTheme(next);
+    render();
+});
+window.addEventListener('hashchange', () => {
+    const h = parseHash();
+    if (h.park !== state.park) { state.park = h.park; state.land = 'ALL'; render(); }
+    if (h.ride && !$('#rideDlg').open) openRide(state.park, h.ride);
+    else if (!h.ride && $('#rideDlg').open) $('#rideDlg').close();
+});
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', render);
 
-function switchTab(view) {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(v => v.style.display = 'none');
-    if(window.event && window.event.target) window.event.target.classList.add('active');
-    document.getElementById(view + 'View').style.display = 'block';
-}
-
-function updateLandOptions() {
-    const park = document.getElementById('parkFilter').value;
-    const lSel = document.getElementById('landFilter');
-    lSel.innerHTML = '<option value="ALL">All Lands</option>';
-    
-    if (park && !park.includes("Universal")) {
-        const lands = [...new Set(globalData.filter(d => d.pk === park).map(d => d.ld))].filter(l => l && !l.toLowerCase().includes("halloween"));
-        lands.forEach(l => lSel.add(new Option(l, l)));
-    }
-    processData();
-}
-
-function processData() {
-    const park = document.getElementById('parkFilter').value;
-    if (!park) return;
-    
-    const land = document.getElementById('landFilter').value;
-    const cutoff = new Date(maxFileDate.getTime() - 7 * 24 * 60 * 60 * 1000);
-
-    const filtered = globalData.filter(d => {
-        const dDate = new Date(d.ts);
-        return d.pk === park && (land === "ALL" || d.ld === land) && dDate >= cutoff && !(d.ld||"").toLowerCase().includes("halloween");
-    });
-
-    renderMasterTable(filtered, park);
-    renderTrends(filtered);
-}
-
-function renderMasterTable(data, park) {
-    const tbody = document.querySelector('#masterTable tbody');
-    tbody.innerHTML = "";
-    if (!data.length) return;
-    
-    const latestTs = data[data.length-1].ts;
-    const current = data.filter(d => d.ts === latestTs);
-    
-    const stats = {};
-    data.forEach(d => {
-        if (!stats[d.rd]) stats[d.rd] = { op: 0, tot: 0, ev: false };
-        stats[d.rd].tot++;
-        if (d.op) { stats[d.rd].op++; stats[d.rd].ev = true; }
-    });
-
-    current.forEach(d => {
-        if (!d.rd || !isNaN(d.rd) || d.rd.length < 3) return;
-        const dur = rideDurations[d.rd] || normMap[norm(d.rd)] || 0;
-        const eff = dur > 0 ? Math.round((dur / (d.wt + dur)) * 100) : 0;
-        const s = stats[d.rd];
-        const uptime = s ? Math.round((s.op / s.tot) * 100) : 0;
-        const isRefurb = s && !s.ev;
-
-        // Custom Hover-States explaining the logic matching your criteria
-        let statusHtml = "";
-        if (isRefurb) {
-            statusHtml = `<span class="status-badge refurb-note" data-reason="REFURB: This ride has reported 0% uptime across the entire 7-day data block.">REFURB</span>`;
-        } else if (!d.op) {
-            statusHtml = `<span class="status-badge status-closed" data-reason="CLOSED: Temporarily down due to weather, maintenance delay, or standard park closing hours.">CLOSED</span>`;
-        } else {
-            statusHtml = `${d.wt}m`;
-        }
-
-        tbody.innerHTML += `
-            <tr>
-                <td><b>${d.rd}</b></td>
-                <td>${statusHtml}</td>
-                <td>${eff > 0 ? eff + '%' : '--'}</td>
-                <td>${isRefurb ? '<span class="refurb-note">REFURB</span>' : uptime + '%'}</td>
-            </tr>`;
-    });
-}
-
-function sortTable(n) {
-    const table = document.getElementById("masterTable");
-    let rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
-    switching = true; dir = "asc";
-    while (switching) {
-        switching = false; rows = table.rows;
-        for (i = 1; i < (rows.length - 1); i++) {
-            shouldSwitch = false;
-            x = rows[i].getElementsByTagName("TD")[n];
-            y = rows[i + 1].getElementsByTagName("TD")[n];
-            if (!x || !y) continue;
-            
-            let valX = x.innerText.toLowerCase().replace('%','').replace('m','');
-            let valY = y.innerText.toLowerCase().replace('%','').replace('m','');
-            
-            if (n > 0) { 
-                valX = parseFloat(valX) || 0;
-                valY = parseFloat(valY) || 0;
-            }
-
-            if (dir == "asc") {
-                if (valX > valY) { shouldSwitch = true; break; }
-            } else if (dir == "desc") {
-                if (valX < valY) { shouldSwitch = true; break; }
-            }
-        }
-        if (shouldSwitch) {
-            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-            switching = true; switchcount++;
-        } else {
-            if (switchcount == 0 && dir == "asc") { dir = "desc"; switching = true; }
-        }
-    }
-}
-
-function renderTrends(data) {
-    if (!data.length) return;
-    const rides = [...new Set(data.map(d => d.rd))].filter(r => r && isNaN(r) && r.length > 3);
-    const buckets = {};
-    
-    data.forEach(d => {
-        if (!d.ts) return;
-        const timeString = d.ts instanceof Date ? d.ts.toISOString() : String(d.ts);
-        
-        let t = "";
-        if (timeString.includes('T')) {
-            t = timeString.split('T')[1].substring(0, 5);
-        } else if (timeString.includes(' ')) {
-            t = timeString.split(' ')[1].substring(0, 5);
-        } else {
-            return;
-        }
-
-        if(!buckets[t]) buckets[t] = {};
-        if(!buckets[t][d.rd]) buckets[t][d.rd] = [];
-        buckets[t][d.rd].push(d.wt);
-    });
-    
-    // Core Chart Fix: Sort and clean X-axis labels to exactly 24 hours of 5-min intervals
-    const sortedTimes = Object.keys(buckets).sort();
-    
-    const datasets = rides.map((r, i) => ({
-        label: r, 
-        data: sortedTimes.map(t => {
-            const v = buckets[t][r];
-            // Now safely mathematical: calculates true average for this specific point across all 7 days
-            return v && v.length > 0 ? Math.round(v.reduce((a,b)=>a+b,0)/v.length) : null;
-        }),
-        borderColor: `hsl(${i * 137.5}, 65%, 50%)`, 
-        borderWidth: 2, 
-        pointRadius: 0, 
-        tension: 0.3
-    }));
-    
-    if (trendChart) trendChart.destroy();
-    trendChart = new Chart(document.getElementById('trendChart'), {
-        type: 'line',
-        data: { labels: sortedTimes, datasets },
-        options: { 
-            responsive: true, 
-            maintainAspectRatio: false,
-            interaction: {
-                mode: 'index',
-                intersect: false
-            },
-            plugins: { 
-                legend: { 
-                    position: 'bottom', 
-                    labels: { boxWidth: 10, font: {size: 10}}
-                },
-                tooltip: {
-                    enabled: true,
-                    position: 'nearest'
-                }
-            },
-            scales: {
-                x: { grid: { display: false } },
-                y: { title: { display: true, text: 'Wait Time (Minutes)' } }
-            }
-        }
-    });
-}
+(async function init() {
+    applyTheme(store('theme') || 'auto');
+    pinned = store('pinned') || {};
+    state.sort = store('sort') || state.sort;
+    const h = parseHash();
+    state.park = h.park !== 'all' ? h.park : (store('park') || 'all');
+    await loadHistory();
+    await loadLive();
+    if (h.ride && live?.parks[state.park]) openRide(state.park, h.ride);
+    setInterval(loadLive, REFRESH_MS);
+    setInterval(loadHistory, 60 * 60 * 1000);
+    setInterval(updateClock, 30 * 1000);
+})();
 </script>
 </body>
 </html>
