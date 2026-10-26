@@ -51,6 +51,7 @@ jobs:
           git config --global user.email "bot@github.com"
           
           git add wait_times.csv data/live.json
+          if [ -f themeparks.csv ]; then git add themeparks.csv; fi
           # Stage quarantined CSVs (or their removal once archived), if any
           if [ -d quarantine ] || git ls-files --error-unmatch quarantine >/dev/null 2>&1; then
             git add -A quarantine/

@@ -67,11 +67,23 @@ def _slot_array(series):
     return out
 
 
+def _json_safe(v):
+    """NaN isn't valid JSON; turn any stray NaN into null."""
+    if isinstance(v, dict):
+        return {k: _json_safe(x) for k, x in v.items()}
+    if isinstance(v, list):
+        return [_json_safe(x) for x in v]
+    if isinstance(v, float) and math.isnan(v):
+        return None
+    return v
+
+
 def _write_json(path, payload):
+    payload = _json_safe(payload)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     tmp = path + '.tmp'
     with open(tmp, 'w', encoding='utf-8') as f:
-        json.dump(payload, f, ensure_ascii=False, separators=(',', ':'))
+        json.dump(payload, f, ensure_ascii=False, separators=(',', ':'), allow_nan=False)
     os.replace(tmp, path)
 
 
@@ -80,9 +92,80 @@ def _park_minute_avg(open_rows):
     return open_rows.groupby(['park_name', 'ts'])['wait_time'].mean().reset_index()
 
 
-def build_history(df, now=None, weeks=8):
-    """Writes history.json from all archived + live rows (already passed through prepare)."""
+def _ll_history(tp_rows):
+    """Lightning Lane heatmaps per (park, ride key): minutes until the earliest return
+    time, and the share of snapshots where it was sold out, by weekday x hour."""
+    out = {}
+    ll = tp_rows[tp_rows['ll_state'].notna()].copy()
+    if ll.empty:
+        return out
+    ll['dow'] = ll['ts'].dt.dayofweek
+    ll['hour'] = ll['ts'].dt.hour
+    ll['sold_out'] = ll['ll_state'] == 'FINISHED'
+    for (park, key), g in ll.groupby(['park_name', 'key']):
+        minutes = [[None] * 24 for _ in range(7)]
+        sold_out = [[None] * 24 for _ in range(7)]
+        for (dow, hour), c in g.groupby(['dow', 'hour']):
+            if len(c) < 3:
+                continue
+            sold_out[int(dow)][int(hour)] = _clean(c['sold_out'].mean() * 100)
+            avail = c['ll_minutes_out'].dropna()
+            if len(avail) >= 3:
+                minutes[int(dow)][int(hour)] = _clean(avail.mean())
+        out[(park, key)] = {
+            'type': g['ll_type'].dropna().iloc[-1] if g['ll_type'].notna().any() else None,  # MP or ILL
+            'minutes': minutes,
+            'soldOut': sold_out,
+        }
+    return out
+
+
+def _source_comparison(qt, tp):
+    """How Queue-Times and ThemeParks.wiki agree on the same snapshots (same poll)."""
+    q = qt[['ts', 'park_name', 'ride_name', 'key', 'is_open', 'wait_time', 'operating']]
+    t = tp[['ts', 'park_name', 'key', 'status', 'standby_wait']]
+    j = q.merge(t, on=['ts', 'park_name', 'key'])
+    j = j[j['operating']]
+    if j.empty:
+        return {}
+    tp_open = j['status'] == 'OPERATING'
+    both_open = j['is_open'] & tp_open & j['standby_wait'].notna()
+    j['diff'] = (j['wait_time'] - j['standby_wait']).where(both_open)
+    j['open_mismatch'] = j['is_open'] != tp_open
+    out = {}
+    for park, g in j.groupby('park_name'):
+        d = g['diff'].dropna()
+        rides = []
+        for ride, rg in g.groupby('ride_name'):
+            rd = rg['diff'].dropna()
+            rides.append({
+                'name': ride,
+                'snapshots': int(len(rg)),
+                'within5': _clean((rd.abs() <= 5).mean() * 100) if len(rd) else None,
+                'meanDiff': round(float(rd.mean()), 1) if len(rd) else None,
+                'openMismatch': _clean(rg['open_mismatch'].mean() * 100),
+            })
+        out[park] = {
+            'snapshots': int(g['ts'].nunique()),
+            'within5': _clean((d.abs() <= 5).mean() * 100) if len(d) else None,
+            'meanAbsDiff': round(float(d.abs().mean()), 1) if len(d) else None,
+            'openMismatch': _clean(g['open_mismatch'].mean() * 100),
+            'rides': sorted(rides, key=lambda x: -(x['openMismatch'] or 0) - (100 - (x['within5'] or 100))),
+        }
+    return out
+
+
+def build_history(df, now=None, weeks=8, tp=None):
+    """Writes history.json from all archived + live rows (already passed through
+    prepare / prepare_tp)."""
     now = now or df['ts'].max()
+    ll_hist, sources = {}, {}
+    if tp is not None and not tp.empty:
+        tp = tp.assign(key=tp['ride_name'].map(_norm))
+        ll_hist = _ll_history(tp[tp['ts'] >= now - timedelta(weeks=weeks)])
+        week_qt = df[df['ts'] >= now - timedelta(days=7)]
+        sources = _source_comparison(week_qt.assign(key=week_qt['ride_name'].map(_norm)),
+                                     tp[tp['ts'] >= now - timedelta(days=7)])
     recent = df[df['ts'] >= now - timedelta(weeks=weeks)]
     open_rows = recent[recent['is_open'] & recent['operating']].copy()
     open_rows['dow'] = open_rows['ts'].dt.dayofweek  # Monday = 0
@@ -122,6 +205,7 @@ def build_history(df, now=None, weeks=8):
                 'best': best,
                 'avg': _clean(rrow['wait_time'].mean()),
                 'profile': _slot_array(wk.groupby('slot')['wait_time'].mean()),
+                'll': ll_hist.get((park, _norm(ride))),
             }
         parks[park] = {'band': band, 'rides': rides}
 
@@ -130,6 +214,7 @@ def build_history(df, now=None, weeks=8):
         'weeks': weeks,
         'slotMinutes': SLOT_MINUTES,
         'parks': parks,
+        'sources': sources,
     })
 
 
@@ -141,10 +226,24 @@ def _load_history():
         return {'parks': {}}
 
 
-def build_live(df):
-    """Writes live.json from the rolling CSV rows (already passed through prepare)."""
+def _hhmm_out(start, ts):
+    # A window that has already opened reads as 0 ("now")
+    return {'start': start.strftime('%H:%M'), 'minutesOut': max(0, _clean((start - ts).total_seconds() / 60))}
+
+
+def build_live(df, tp=None):
+    """Writes live.json from the rolling CSV rows (passed through prepare / prepare_tp).
+
+    Ride status comes from ThemeParks.wiki when it has the ride (it distinguishes
+    down from closed); otherwise it is inferred from Queue-Times open/closed history.
+    """
     if df.empty:
         return
+    if tp is not None and not tp.empty:
+        tp = tp.assign(key=tp['ride_name'].map(_norm),
+                       slot=(tp['ts'].dt.hour * 60 + tp['ts'].dt.minute) // SLOT_MINUTES)
+    else:
+        tp = None
     history = _load_history()
     latest_overall = df['ts'].max()
     week = df[df['ts'] >= latest_overall - timedelta(days=7)]
@@ -158,6 +257,16 @@ def build_live(df):
         day_of = lambda ts: (ts - timedelta(hours=4)).dt.date
         today = prow[day_of(prow['ts']) == (latest - timedelta(hours=4)).date()]
         hist_rides = history.get('parks', {}).get(park, {}).get('rides', {})
+
+        # ThemeParks.wiki rows for this park: the snapshot closest to Queue-Times' latest
+        tp_snap, tp_today = {}, None
+        if tp is not None:
+            ptp = tp[tp['park_name'] == park]
+            if not ptp.empty:
+                tp_latest = ptp['ts'].max()
+                if abs((tp_latest - latest).total_seconds()) <= 15 * 60:
+                    tp_snap = {row['key']: row for _, row in ptp[ptp['ts'] == tp_latest].iterrows()}
+                tp_today = ptp[day_of(ptp['ts']) == (latest - timedelta(hours=4)).date()]
 
         today_open = today[today['is_open'] & today['operating']]
         snaps = _park_minute_avg(today_open)
@@ -180,17 +289,48 @@ def build_live(df):
             # simply not scheduled now rather than broken down.
             usually_runs_now = typical is not None or not h.get('heat')
 
-            if r['is_open']:
-                status = 'open'
-            elif not ever_open:
+            key = _norm(name)
+            t = tp_snap.get(key)
+            tp_status = t['status'] if t is not None else None
+
+            if tp_status == 'REFURBISHMENT' or (not ever_open and not r['is_open']):
                 status = 'refurb'
-            elif operating and usually_runs_now:
+            elif tp_status == 'OPERATING' or (tp_status is None and r['is_open']):
+                status = 'open'
+            elif tp_status == 'DOWN' or (tp_status is None and operating and usually_runs_now):
                 status = 'down'
             else:
                 status = 'closed'
 
+            # Queue-Times' posted wait, or ThemeParks.wiki's when only it has the ride open
+            wait = int(r['wait_time']) if r['is_open'] else None
+            if status == 'open' and wait is None and t is not None and pd.notna(t['standby_wait']):
+                wait = int(t['standby_wait'])
+
+            ll = None
+            ll_spark = tp_spark = None
+            if t is not None and pd.notna(t['ll_type']):
+                ll = {'type': t['ll_type'], 'state': t['ll_state']}
+                if t['ll_state'] == 'AVAILABLE' and pd.notna(t['ll_start']):
+                    ll.update(_hhmm_out(t['ll_start'], t['ts']))
+            if tp_today is not None:
+                rt_tp = tp_today[tp_today['key'] == key]
+                if rt_tp['ll_type'].notna().any():
+                    ll_spark = _slot_array(rt_tp.groupby('slot')['ll_minutes_out'].mean())
+                tp_open = rt_tp[rt_tp['status'] == 'OPERATING']
+                tp_spark = _slot_array(tp_open.groupby('slot')['standby_wait'].mean())
+
             down_since = None
-            if status == 'down':
+            if status == 'down' and tp_today is not None and t is not None:
+                rt_tp = tp_today[tp_today['key'] == key].sort_values('ts')
+                ran = rt_tp[rt_tp['status'] == 'OPERATING']
+                if not ran.empty:
+                    after = rt_tp[rt_tp['ts'] > ran['ts'].max()]
+                    if not after.empty:
+                        down_since = after['ts'].min().strftime('%H:%M')
+                else:
+                    down_since = 'open'
+            elif status == 'down':
                 rt = today[today['ride_name'] == name].sort_values('ts')
                 opened = rt[rt['is_open']]
                 if not opened.empty:
@@ -204,7 +344,6 @@ def build_live(df):
             spark = _slot_array(rt_open.groupby('slot')['wait_time'].mean())
 
             dur = ride_duration(name)
-            wait = int(r['wait_time'])
             rides.append({
                 'name': name,
                 'land': r['land'],
@@ -213,10 +352,17 @@ def build_live(df):
                 'typical': typical,
                 'downSince': down_since,
                 'uptime': uptime,
-                'eff': round(dur / (wait + dur) * 100) if dur and status == 'open' else None,
+                'eff': round(dur / (wait + dur) * 100) if dur and wait is not None and status == 'open' else None,
                 'duration': dur,
                 'best': h.get('best'),
                 'spark': spark,
+                'll': ll,
+                'llSpark': ll_spark,
+                # Raw values from each source, for the data-sources comparison
+                'qtWait': int(r['wait_time']) if r['is_open'] else None,
+                'tpStatus': tp_status,
+                'tpWait': int(t['standby_wait']) if t is not None and pd.notna(t['standby_wait']) else None,
+                'tpSpark': tp_spark,
             })
 
         parks[park] = {
@@ -236,10 +382,21 @@ def build_live(df):
 if __name__ == '__main__':
     # Manual rebuild of both files: python build_dashboard.py
     import glob
-    frames = [pd.read_parquet(f) for f in sorted(glob.glob('history/*.parquet'))]
-    live = pd.read_csv('wait_times.csv')
-    all_rows = prepare(pd.concat(frames + [live], ignore_index=True))
-    all_rows = all_rows.drop_duplicates(subset=['ts', 'park_name', 'ride_name'], keep='last')
-    build_history(all_rows)
-    build_live(prepare(live))
+    from themeparks import TP_CSV, prepare_tp
+
+    def load_all(pattern, csv_path, prep):
+        frames = [pd.read_parquet(f) for f in sorted(glob.glob(pattern))]
+        live = pd.read_csv(csv_path) if os.path.exists(csv_path) else None
+        if live is not None:
+            frames.append(live)
+        if not frames:
+            return None, None
+        rows = prep(pd.concat(frames, ignore_index=True))
+        rows = rows.drop_duplicates(subset=['ts', 'park_name', 'ride_name'], keep='last')
+        return rows, (prep(live) if live is not None else None)
+
+    qt_all, qt_live = load_all('history/wait_times_*.parquet', 'wait_times.csv', prepare)
+    tp_all, tp_live = load_all('history/themeparks_*.parquet', TP_CSV, prepare_tp)
+    build_history(qt_all, tp=tp_all)
+    build_live(qt_live, tp_live)
     print('Wrote', HISTORY_JSON, 'and', LIVE_JSON)
