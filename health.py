@@ -28,17 +28,17 @@ def csv_is_usable(df):
     return valid >= 0.5 * len(df)
 
 
-def salvage_csv(path):
-    """Best-effort read of a damaged wait-times CSV; returns a DataFrame or None.
+def salvage_csv(path, column_sets=None):
+    """Best-effort read of a damaged CSV; returns a DataFrame or None.
 
     Skips malformed lines, and if the header itself is damaged, re-reads the file
-    assuming the scraper's standard column order.
+    with each candidate column order in column_sets (default: wait_times.csv's).
     """
-    attempts = [
-        dict(on_bad_lines='skip', engine='python'),
-        dict(on_bad_lines='skip', engine='python', header=None, skiprows=1, names=CSV_COLUMNS),
-        dict(on_bad_lines='skip', engine='python', header=None, skiprows=1, names=CSV_COLUMNS[:3] + CSV_COLUMNS[4:]),
-    ]
+    if column_sets is None:
+        column_sets = [CSV_COLUMNS, CSV_COLUMNS[:3] + CSV_COLUMNS[4:]]
+    attempts = [dict(on_bad_lines='skip', engine='python')]
+    attempts += [dict(on_bad_lines='skip', engine='python', header=None, skiprows=1, names=cols)
+                 for cols in column_sets]
     for kwargs in attempts:
         try:
             df = pd.read_csv(path, encoding_errors='replace', **kwargs)

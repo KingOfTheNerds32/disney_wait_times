@@ -230,6 +230,24 @@ table.heat td.today { outline: 2px solid var(--text); outline-offset: -2px; }
 .heat-legend { display: flex; gap: 2px; align-items: center; font-size: 0.72rem; color: var(--text-2); margin-top: 8px; }
 .heat-legend i { width: 22px; height: 10px; border-radius: 2px; display: inline-block; }
 
+.ll { font-size: 0.8rem; color: var(--text-2); display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.ll-tag {
+    font-size: 0.7rem; font-weight: 700; padding: 1px 6px; border-radius: 4px;
+    border: 1px solid var(--border); color: var(--text); white-space: nowrap;
+}
+.ll-tag.ILL { border-color: var(--series-2); }
+.ll-tag.MP { border-color: var(--series-1); }
+.ll b { color: var(--text); }
+table.heat td.soldout { background: repeating-linear-gradient(135deg, var(--surface-2) 0 4px, var(--border) 4px 6px) !important; color: var(--text-2) !important; }
+.seg { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 8px; }
+.seg button { background: var(--surface); border: none; padding: 5px 12px; cursor: pointer; font-size: 0.82rem; color: var(--text-2); }
+.seg button[aria-pressed="true"] { background: var(--surface-2); color: var(--text); font-weight: 600; }
+table.src { width: 100%; border-collapse: collapse; font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+table.src th, table.src td { text-align: left; padding: 6px 8px; border-top: 1px solid var(--border); }
+table.src th { color: var(--text-2); font-weight: 500; border-top: none; }
+table.src td.num, table.src th.num { text-align: right; }
+.table-scroll { overflow-x: auto; }
+
 .foot { color: var(--text-3); font-size: 0.78rem; margin-top: 24px; }
 .foot a { color: inherit; }
 </style>
@@ -270,7 +288,7 @@ const SHORT = {
 
 let live = null;
 let hist = { parks: {} };
-let state = { park: 'all', land: 'ALL', sort: 'wait', q: '', hideClosed: false };
+let state = { park: 'all', land: 'ALL', sort: 'wait', q: '', hideClosed: false, llOnly: false, heatMode: 'standby' };
 let pinned = {};       // park -> [ride names] shown on the trend chart
 let charts = {};
 
@@ -307,6 +325,24 @@ function compare(r) {
     return diff < 0
         ? { cls: 'shorter', text: `↓ ${-diff}m shorter than usual`, diff }
         : { cls: 'longer', text: `↑ ${diff}m longer than usual`, diff };
+}
+
+function fmtOut(m) {
+    if (m == null) return '';
+    if (m <= 0) return 'now';
+    return m < 60 ? `in ${m}m` : `in ${Math.floor(m / 60)}h ${String(m % 60).padStart(2, '0')}m`;
+}
+
+// Lightning Lane line for a ride: type (Multi Pass vs Single Pass) and next return time.
+const LL_NAMES = { MP: 'Multi Pass', ILL: 'Single Pass' };
+function llHtml(r) {
+    if (!r.ll) return '';
+    const tag = `<span class="ll-tag ${esc(r.ll.type)}" title="Lightning Lane ${LL_NAMES[r.ll.type] || ''}${r.ll.type === 'ILL' ? ' (individual, bought per ride)' : ' (included in Multi Pass)'}">⚡ ${LL_NAMES[r.ll.type] || 'LL'}</span>`;
+    let text;
+    if (r.ll.state === 'AVAILABLE' && r.ll.start) text = `return <b>${fmtClock(r.ll.start)}</b> · ${fmtOut(r.ll.minutesOut)}`;
+    else if (r.ll.state === 'FINISHED') text = 'sold out for today';
+    else text = esc(String(r.ll.state || 'unavailable').toLowerCase().replace('_', ' '));
+    return `<div class="ll">${tag}<span>${text}</span></div>`;
 }
 
 function statusBadge(r) {
@@ -374,7 +410,7 @@ function dayRange(park) {
 // ---------- rendering ----------
 function renderTabs() {
     const parks = Object.keys(live.parks);
-    const tabs = [['all', 'All parks'], ...parks.map(p => [p, SHORT[p] || p])];
+    const tabs = [['all', 'All parks'], ...parks.map(p => [p, SHORT[p] || p]), ['sources', 'Data sources']];
     $('#parkTabs').innerHTML = tabs.map(([k, label]) =>
         `<button role="tab" type="button" data-park="${esc(k)}" aria-selected="${state.park === k}">${esc(label)}</button>`
     ).join('');
@@ -385,7 +421,9 @@ function render() {
     renderTabs();
     Object.values(charts).forEach(c => c.destroy());
     charts = {};
-    if (state.park === 'all' || !live.parks[state.park]) {
+    if (state.park === 'sources') {
+        renderSources();
+    } else if (state.park === 'all' || !live.parks[state.park]) {
         state.park = 'all';
         renderOverview();
     } else {
@@ -473,16 +511,53 @@ function renderPark(park) {
     <div class="controls">
         <select id="landSel" aria-label="Land"><option value="ALL">All lands</option>${lands.map(l => `<option ${l === state.land ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select>
         <select id="sortSel" aria-label="Sort by">
-            ${[['wait', 'Longest wait'], ['shortest', 'Shortest wait'], ['vs', 'Best vs usual'], ['eff', 'Efficiency'], ['uptime', 'Least reliable'], ['name', 'Name']]
+            ${[['wait', 'Longest wait'], ['shortest', 'Shortest wait'], ['vs', 'Best vs usual'], ['eff', 'Efficiency'], ['uptime', 'Least reliable'], ['ll', 'Soonest Lightning Lane'], ['name', 'Name']]
                 .map(([k, l]) => `<option value="${k}" ${state.sort === k ? 'selected' : ''}>${l}</option>`).join('')}
         </select>
         <input type="search" id="searchBox" placeholder="Search rides" value="${esc(state.q)}" aria-label="Search rides">
         <label><input type="checkbox" id="hideClosed" ${state.hideClosed ? 'checked' : ''}> Open only</label>
+        <label><input type="checkbox" id="llOnly" ${state.llOnly ? 'checked' : ''}> Lightning Lane only</label>
     </div>
     <div class="grid" id="rideGrid"></div>`;
 
     renderGrid(park);
     renderParkChart(park);
+}
+
+function renderSources() {
+    const pct = v => v == null ? '—' : `${v}%`;
+    const parks = Object.keys(live.parks);
+    const now = parks.map(park => {
+        // Rides the two sources currently disagree on (open/closed, or wait by more than 5m)
+        const rows = live.parks[park].rides.filter(r => r.tpStatus).map(r => {
+            const qtOpen = r.qtWait != null, tpOpen = r.tpStatus === 'OPERATING';
+            let issue = null;
+            if (qtOpen !== tpOpen) issue = `Queue-Times: ${qtOpen ? 'open' : 'closed'} · ThemeParks.wiki: ${r.tpStatus.toLowerCase()}`;
+            else if (qtOpen && r.tpWait != null && Math.abs(r.qtWait - r.tpWait) > 5) issue = `${r.qtWait}m vs ${r.tpWait}m`;
+            return issue && { name: r.name, issue };
+        }).filter(Boolean);
+        return `<div class="card section"><h2>${esc(park)}: right now</h2>
+            ${rows.length ? `<ul class="now-list">${rows.map(x => `<li data-park-ride="${esc(park)}" data-ride-name="${esc(x.name)}"><div class="name">${esc(x.name)}</div><div class="num meta">${esc(x.issue)}</div></li>`).join('')}</ul>`
+              : '<p class="sub">Both sources agree on every ride.</p>'}</div>`;
+    }).join('');
+
+    const src = hist.sources || {};
+    const week = parks.filter(p => src[p]).map(park => {
+        const s = src[park];
+        const worst = s.rides.filter(r => (r.openMismatch ?? 0) > 0 || (r.within5 ?? 100) < 90).slice(0, 10);
+        return `<div class="card section"><h2>${esc(park)}: last 7 days</h2>
+            <p class="sub">${s.snapshots} matched snapshots while the park was open. Waits within 5 min: <b>${pct(s.within5)}</b> · average gap ${s.meanAbsDiff ?? '—'}m · open/closed disagree: <b>${pct(s.openMismatch)}</b></p>
+            ${worst.length ? `<div class="table-scroll"><table class="src"><tr><th>Ride</th><th class="num">Within 5m</th><th class="num">Avg diff (QT − TP)</th><th class="num">Open/closed disagree</th></tr>
+                ${worst.map(r => `<tr><td>${esc(r.name)}</td><td class="num">${pct(r.within5)}</td><td class="num">${r.meanDiff == null ? '—' : (r.meanDiff > 0 ? '+' : '') + r.meanDiff + 'm'}</td><td class="num">${pct(r.openMismatch)}</td></tr>`).join('')}
+            </table></div>` : '<p class="sub">No rides with notable disagreement.</p>'}</div>`;
+    }).join('');
+
+    $('#main').innerHTML = `
+        <p class="sub">Standby data comes from two independent sources polled at the same moment:
+        <b>Queue-Times</b> (what the dashboard shows) and <b>ThemeParks.wiki</b> (which also supplies ride status and Lightning Lane).
+        Weekly figures update once a day.</p>
+        ${now}
+        ${week || '<p class="empty">Weekly comparison appears after the first daily archive run with ThemeParks.wiki data.</p>'}`;
 }
 
 function sortRides(list) {
@@ -493,6 +568,7 @@ function sortRides(list) {
         vs: (a, b) => (compare(a)?.diff ?? 1e9) - (compare(b)?.diff ?? 1e9),
         eff: (a, b) => (b.eff ?? -1) - (a.eff ?? -1),
         uptime: (a, b) => (a.uptime ?? 1e9) - (b.uptime ?? 1e9),
+        ll: (a, b) => (a.ll?.minutesOut ?? 1e9) - (b.ll?.minutesOut ?? 1e9),
         name: (a, b) => a.name.localeCompare(b.name),
     }[state.sort];
     return list.sort((a, b) => (state.sort === 'uptime' || state.sort === 'name' ? 0 : statusRank(a) - statusRank(b)) || by(a, b) || a.name.localeCompare(b.name));
@@ -507,7 +583,8 @@ function renderGrid(park) {
     const list = sortRides(p.rides.filter(r =>
         (state.land === 'ALL' || r.land === state.land) &&
         (!q || r.name.toLowerCase().includes(q)) &&
-        (!state.hideClosed || r.status === 'open')));
+        (!state.hideClosed || r.status === 'open') &&
+        (!state.llOnly || r.ll)));
 
     $('#rideGrid').innerHTML = list.length ? list.map(r => {
         const c = compare(r);
@@ -523,6 +600,7 @@ function renderGrid(park) {
                 <div class="wait">${active ? `${r.wait}<small> min</small>` : '—'}</div>
             </div>
             ${c ? `<span class="delta ${c.cls}">${c.text}</span>` : statusBadge(r)}
+            ${llHtml(r)}
             ${sparkSvg(r.spark || [], rideHist[r.name]?.profile, range)}
             <div class="facts">${facts.map(esc).join('<span>·</span>')}
                 <button type="button" class="pin" data-pin="${esc(r.name)}" aria-pressed="${isPinned}" style="margin-left:auto">${isPinned ? '✓ On chart' : '＋ Chart'}</button>
@@ -532,7 +610,12 @@ function renderGrid(park) {
 }
 
 function lineDataset(label, data, color, extra = {}) {
-    return { label, data, borderColor: color, backgroundColor: color, borderWidth: 2, pointRadius: 0, pointHoverRadius: 4, tension: 0.3, spanGaps: false, ...extra };
+    // Draw a dot only where a value has no neighbours, so a lone reading is still visible.
+    const lone = (ctx) => {
+        const d = ctx.dataset.data, i = ctx.dataIndex;
+        return d[i] != null && d[i - 1] == null && d[i + 1] == null ? 2.5 : 0;
+    };
+    return { label, data, borderColor: color, backgroundColor: color, borderWidth: 2, pointRadius: lone, pointHoverRadius: 4, tension: 0.3, spanGaps: false, ...extra };
 }
 
 function chartOptions(yTitle) {
@@ -595,17 +678,34 @@ function openRide(park, name) {
         ['Efficiency', r.eff != null ? `${r.eff}%` : '—'],
         ['Ride length', r.duration ? `${r.duration} min` : '—'],
     ];
+    if (r.ll) {
+        const when = r.ll.state === 'AVAILABLE' && r.ll.start ? `${fmtClock(r.ll.start)} (${fmtOut(r.ll.minutesOut)})` : r.ll.state === 'FINISHED' ? 'Sold out' : '—';
+        facts.splice(1, 0, [`LL ${LL_NAMES[r.ll.type] || ''} return`, when]);
+    }
+    const hasLL = !!(r.ll || h.ll);
+    if (!hasLL) state.heatMode = 'standby';
     $('#dlgBody').innerHTML = `
-        <div>${c ? `<span class="delta ${c.cls}">${c.text}</span>` : statusBadge(r)}</div>
+        <div>${c ? `<span class="delta ${c.cls}">${c.text}</span>` : statusBadge(r)} ${llHtml(r)}</div>
         <div class="facts-grid">${facts.map(([k, v]) => `<div><b>${esc(v)}</b><span>${esc(k)}</span></div>`).join('')}</div>
         <div>
-            <h2 style="font-size:.95rem;margin:0 0 4px">Today vs last 7 days</h2>
+            <h2 style="font-size:.95rem;margin:0 0 4px">Standby today vs last 7 days</h2>
             <div class="chart-box small"><canvas id="rideChart" role="img" aria-label="Wait today compared with the 7-day average"></canvas></div>
         </div>
+        ${r.llSpark ? `<div>
+            <h2 style="font-size:.95rem;margin:0 0 4px">Lightning Lane today</h2>
+            <p class="sub">How far ahead the earliest return time was through the day. Gaps: sold out or not offered.</p>
+            <div class="chart-box small"><canvas id="llChart" role="img" aria-label="Minutes until the Lightning Lane return time, today"></canvas></div>
+        </div>` : ''}
         <div>
-            <h2 style="font-size:.95rem;margin:0 0 4px">When is it shortest?</h2>
-            <p class="sub">Average posted wait by weekday and hour, last ${hist.weeks || 8} weeks. Outlined: now.</p>
-            ${heatmapHtml(h.heat, dow, hour)}
+            <h2 style="font-size:.95rem;margin:0 0 4px">${state.heatMode === 'll' ? 'When is Lightning Lane soonest?' : 'When is it shortest?'}</h2>
+            ${hasLL ? `<div class="seg" role="group" aria-label="Heatmap">
+                <button type="button" data-heat="standby" aria-pressed="${state.heatMode !== 'll'}">Standby wait</button>
+                <button type="button" data-heat="ll" aria-pressed="${state.heatMode === 'll'}">Lightning Lane return</button></div>` : ''}
+            ${state.heatMode === 'll'
+                ? `<p class="sub">Average minutes until the earliest return time, by weekday and hour. Hatched: usually sold out. Outlined: now.</p>
+                   ${heatmapHtml(h.ll?.minutes, dow, hour, { soldOut: h.ll?.soldOut, lo: 'Sooner', hi: 'Later', empty: 'Lightning Lane history is still being collected; this fills in over the coming weeks.' })}`
+                : `<p class="sub">Average posted wait by weekday and hour, last ${hist.weeks || 8} weeks. Outlined: now.</p>
+                   ${heatmapHtml(h.heat, dow, hour)}`}
         </div>`;
 
     const dlg = $('#rideDlg');
@@ -620,18 +720,29 @@ function openRide(park, name) {
             type: 'line',
             data: { labels, datasets: [
                 lineDataset('7-day average', (h.profile || []).slice(lo, hi + 1), cssVar('--neutral'), { borderDash: [5, 4], borderWidth: 1.5 }),
-                lineDataset('Today', (r.spark || []).slice(lo, hi + 1), cssVar('--series-1')),
+                lineDataset('Today (Queue-Times)', (r.spark || []).slice(lo, hi + 1), cssVar('--series-1')),
+                ...(r.tpSpark ? [lineDataset('Today (ThemeParks.wiki)', r.tpSpark.slice(lo, hi + 1), cssVar('--series-2'), { borderWidth: 1.5 })] : []),
             ] },
             options: chartOptions('Minutes'),
         });
+        if (charts.ll) charts.ll.destroy();
+        if (r.llSpark) {
+            charts.ll = new Chart($('#llChart'), {
+                type: 'line',
+                data: { labels, datasets: [lineDataset('Minutes until return', r.llSpark.slice(lo, hi + 1), cssVar('--series-1'))] },
+                options: chartOptions('Minutes ahead'),
+            });
+        }
     }
 }
 
-function heatmapHtml(heat, nowDow, nowHour) {
-    if (!heat) return '<p class="empty">Not enough history yet.</p>';
+function heatmapHtml(heat, nowDow, nowHour, opts = {}) {
+    const { soldOut = null, lo = 'Shorter', hi = 'Longer', empty = 'Not enough history yet.' } = opts;
+    const isSoldOut = (d, hr) => soldOut && soldOut[d][hr] != null && soldOut[d][hr] >= 50;
+    if (!heat) return `<p class="empty">${esc(empty)}</p>`;
     const hours = [];
-    for (let hr = 0; hr < 24; hr++) if (heat.some(row => row[hr] != null)) hours.push(hr);
-    if (!hours.length) return '<p class="empty">Not enough history yet.</p>';
+    for (let hr = 0; hr < 24; hr++) if (heat.some((row, d) => row[hr] != null || isSoldOut(d, hr))) hours.push(hr);
+    if (!hours.length) return `<p class="empty">${esc(empty)}</p>`;
     const all = heat.flat().filter(v => v != null);
     const max = Math.max(10, ...all);
     const step = v => v == null ? 0 : Math.min(7, 1 + Math.floor(v / max * 6.999));
@@ -640,11 +751,14 @@ function heatmapHtml(heat, nowDow, nowHour) {
     const rows = heat.map((row, d) => `<tr><th>${DAYS[d]}</th>${hours.map(hr => {
         const v = row[hr], s = step(v);
         const isNow = d === nowDow && hr === nowHour;
+        if (isSoldOut(d, hr)) {
+            return `<td class="soldout ${isNow ? 'today' : ''}" title="${DAYS[d]} ${fmtHour(hr)}: sold out ${soldOut[d][hr]}% of the time">✕</td>`;
+        }
         return `<td class="${isNow ? 'today' : ''}" style="background:var(--heat-${s});color:${v == null ? 'var(--text-3)' : ink(s)}" title="${DAYS[d]} ${fmtHour(hr)}: ${v == null ? 'no data' : v + ' min'}">${v == null ? '' : v}</td>`;
     }).join('')}</tr>`).join('');
     const legend = [1, 2, 3, 4, 5, 6, 7].map(s => `<i style="background:var(--heat-${s})"></i>`).join('');
     return `<div class="heat-scroll"><table class="heat">${head}${rows}</table></div>
-        <div class="heat-legend">Shorter ${legend} Longer (max ${max}m)</div>`;
+        <div class="heat-legend">${lo} ${legend} ${hi} (max ${max}m)${soldOut ? ' · ✕ sold out' : ''}</div>`;
 }
 
 // ---------- data loading ----------
@@ -706,6 +820,13 @@ function applyTheme(t) {
 document.addEventListener('click', e => {
     const tab = e.target.closest('[data-park]');
     if (tab) return setPark(tab.dataset.park);
+    const heatBtn = e.target.closest('[data-heat]');
+    if (heatBtn) {
+        state.heatMode = heatBtn.dataset.heat;
+        const m = parseHash();
+        if (m.ride) openRide(m.park, m.ride);
+        return;
+    }
     const pin = e.target.closest('[data-pin]');
     if (pin) {
         const list = pinned[state.park] = pinned[state.park] || [];
@@ -715,6 +836,8 @@ document.addEventListener('click', e => {
         store('pinned', pinned);
         return render();
     }
+    const srcRide = e.target.closest('[data-park-ride]');
+    if (srcRide) return openRide(srcRide.dataset.parkRide, srcRide.dataset.rideName);
     const ride = e.target.closest('[data-ride]');
     if (ride) openRide(state.park, ride.dataset.ride);
 });
@@ -725,6 +848,7 @@ document.addEventListener('change', e => {
     if (e.target.id === 'landSel') state.land = e.target.value;
     else if (e.target.id === 'sortSel') { state.sort = e.target.value; store('sort', state.sort); }
     else if (e.target.id === 'hideClosed') state.hideClosed = e.target.checked;
+    else if (e.target.id === 'llOnly') state.llOnly = e.target.checked;
     else return;
     renderGrid(state.park);
 });
@@ -735,6 +859,7 @@ $('#dlgClose').addEventListener('click', () => $('#rideDlg').close());
 $('#rideDlg').addEventListener('click', e => { if (e.target.id === 'rideDlg') e.target.close(); });
 $('#rideDlg').addEventListener('close', () => {
     if (charts.ride) { charts.ride.destroy(); delete charts.ride; }
+    if (charts.ll) { charts.ll.destroy(); delete charts.ll; }
     window.history.replaceState(null, '', state.park === 'all' ? '#' : `#park=${encodeURIComponent(state.park)}`);
 });
 $('#themeBtn').addEventListener('click', () => {
@@ -746,7 +871,8 @@ $('#themeBtn').addEventListener('click', () => {
 });
 window.addEventListener('hashchange', () => {
     const h = parseHash();
-    if (h.park !== state.park) { state.park = h.park; state.land = 'ALL'; render(); }
+    // Opening a ride from the Data sources tab names the ride's park; stay on the tab.
+    if (h.park !== state.park && !h.ride) { state.park = h.park; state.land = 'ALL'; render(); }
     if (h.ride && !$('#rideDlg').open) openRide(state.park, h.ride);
     else if (!h.ride && $('#rideDlg').open) $('#rideDlg').close();
 });

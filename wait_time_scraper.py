@@ -6,10 +6,12 @@ import pytz
 
 from build_dashboard import build_live, prepare
 from health import csv_is_usable, describe, note_problem, salvage_csv
+from themeparks import TP_COLUMNS, TP_CSV, fetch_themeparks, prepare_tp
 
 LIVE_DAYS = 10
+QT_CSV = 'wait_times.csv'
 
-def load_existing_csv(path):
+def load_existing_csv(path, column_sets=None):
     """Reads the live CSV, recovering from corruption instead of failing the poll.
 
     The CSV holds rows the daily archive hasn't copied to Parquet yet, so it is never
@@ -25,7 +27,7 @@ def load_existing_csv(path):
     except Exception as e:
         problem = describe(e)
 
-    df = salvage_csv(path)
+    df = salvage_csv(path, column_sets)
     if df is not None:
         with open(path, encoding='utf-8', errors='replace') as f:
             total = sum(1 for _ in f) - 1
@@ -34,7 +36,8 @@ def load_existing_csv(path):
         return df
 
     os.makedirs('quarantine', exist_ok=True)
-    dest = f"quarantine/wait_times_{datetime.now(timezone.utc):%Y%m%d_%H%M%S}.csv"
+    stem = os.path.splitext(os.path.basename(path))[0]
+    dest = f"quarantine/{stem}_{datetime.now(timezone.utc):%Y%m%d_%H%M%S}.csv"
     os.replace(path, dest)
     note_problem(f'{path} could not be read ({problem}). Moved it to {dest} and started a '
                  f'fresh file; the daily archive will try to recover its rows.')
@@ -76,36 +79,45 @@ def pull_wait_times():
         except Exception as e:
             print(f"Error fetching park {park_name} ({park_id}): {e}")
 
-    if all_rows:
-        new_data_df = pd.DataFrame(all_rows)
-        master_csv_file = 'wait_times.csv'
-        
-        # Load existing data
-        existing_df = None
-        if os.path.exists(master_csv_file) and os.path.getsize(master_csv_file) > 0:
-            existing_df = load_existing_csv(master_csv_file)
-        if existing_df is not None:
-            combined_df = pd.concat([existing_df, new_data_df], ignore_index=True)
-        else:
-            combined_df = new_data_df
+    cutoff = now_tz.replace(tzinfo=None) - timedelta(days=LIVE_DAYS)
+    live_df = append_rolling_csv(QT_CSV, all_rows, cutoff) if all_rows else None
 
-        # 'coerce' turns any corrupted or broken timestamp strings into NaT (Not a Time) values safely
-        combined_df['fetch_timestamp'] = pd.to_datetime(combined_df['fetch_timestamp'], errors='coerce')
-        
-        # Drop any rows that couldn't be parsed so they don't break the rest of the script
-        combined_df.dropna(subset=['fetch_timestamp'], inplace=True)
+    # ThemeParks.wiki (ride status + Lightning Lane). A failure here never blocks the
+    # Queue-Times data above.
+    tp_rows, tp_errors = fetch_themeparks(fetch_time)
+    if tp_errors and not tp_rows:
+        note_problem('ThemeParks.wiki fetch failed for every park: ' + '; '.join(tp_errors))
+    tp_df = append_rolling_csv(TP_CSV, tp_rows, cutoff, [TP_COLUMNS]) if tp_rows else None
 
-        combined_df.drop_duplicates(subset=['fetch_timestamp', 'ride_name'], keep='last', inplace=True)
+    if live_df is not None:
+        if tp_df is None and os.path.exists(TP_CSV):
+            tp_df = load_existing_csv(TP_CSV, [TP_COLUMNS])
+        build_live(prepare(live_df), prepare_tp(tp_df) if tp_df is not None else None)
+        print(f"Logged {len(all_rows)} Queue-Times rides and {len(tp_rows)} ThemeParks.wiki rides.")
 
-        # Keep a rolling window in the CSV. The daily archive job (archive.py) moves
-        # rows into history/*.parquet, so this only needs to outlast a few missed runs
-        # while still covering the 7 days the dashboard's uptime figures use.
-        cutoff_date = now_tz.replace(tzinfo=None) - timedelta(days=LIVE_DAYS)
-        live_dash_df = combined_df[combined_df['fetch_timestamp'] >= cutoff_date].copy()
-        live_dash_df.to_csv(master_csv_file, index=False)
 
-        build_live(prepare(live_dash_df))
-        print(f"Logged {len(all_rows)} rides. Live CSV and dashboard data updated.")
+def append_rolling_csv(path, rows, cutoff, column_sets=None):
+    """Appends rows to a rolling CSV, keeps rows newer than cutoff, returns the result.
+
+    The daily archive job (archive.py) copies rows into history/*.parquet, so the CSV
+    only needs to outlast a few missed archive runs and cover the 7 days the
+    dashboard's uptime figures use.
+    """
+    combined = pd.DataFrame(rows)
+    if os.path.exists(path) and os.path.getsize(path) > 0:
+        existing = load_existing_csv(path, column_sets)
+        if existing is not None:
+            combined = pd.concat([existing, combined], ignore_index=True)
+
+    # 'coerce' turns broken timestamps into NaT, which are then dropped
+    combined['fetch_timestamp'] = pd.to_datetime(combined['fetch_timestamp'], errors='coerce')
+    combined.dropna(subset=['fetch_timestamp'], inplace=True)
+    combined.drop_duplicates(subset=['fetch_timestamp', 'park_name', 'ride_name'], keep='last', inplace=True)
+
+    live = combined[combined['fetch_timestamp'] >= cutoff].copy()
+    live.to_csv(path, index=False)
+    return live
+
 
 if __name__ == "__main__":
     pull_wait_times()
