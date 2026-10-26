@@ -16,10 +16,13 @@ concurrency:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+  GIT_TERMINAL_PROMPT: '0'   # git must fail, never wait for input
 
 jobs:
   archive:
     runs-on: ubuntu-latest
+    # A hung step fails the run (and raises an alert) instead of blocking later polls
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
@@ -37,7 +40,9 @@ jobs:
         run: python archive.py
 
       - name: Commit and push changes
+        timeout-minutes: 3
         run: |
+          set -x   # log each git command so a slow one is easy to spot
           git config --global user.name "DisneyBot"
           git config --global user.email "bot@github.com"
 
@@ -50,7 +55,7 @@ jobs:
 
           # Polls push every 5 minutes but never touch these files, so rebasing is clean.
           for i in 1 2 3; do
-            git pull --rebase && git push && exit 0
+            timeout 60 git pull --rebase && timeout 90 git push && exit 0
             sleep $((i * 5))
           done
           exit 1
