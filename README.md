@@ -11,36 +11,46 @@ The system operates entirely on free, serverless infrastructure—using an exter
 ## Architecture Overview
 
 ```
-                      [cron-job.org]
-                            │
-               Pings every 5 mins (Webhook)
-                            ▼
-                  [GitHub Actions Runner]
-                            │
-              Runs: wait_time_scraper.py
-              Pulls: Queue-Times API
-                            │
-               ┌────────────┴────────────┐
-               ▼                         ▼
-      [Live Dashboard Tier]     [Historical Tier]
-        wait_times.csv          history/*.parquet
-      (Rolling last 14 days)    (Monthly Snappy-compressed)
-               │
-               ▼
-      [GitHub Pages UI]
-         index.html
-     (Vanilla JS + Chart.js)
-
+     [cron-job.org] every 5 min              [GitHub schedule] daily, ~3-4 AM PT
+              │                                          │
+              ▼                                          ▼
+   poll.yml → wait_time_scraper.py           archive.yml → archive.py
+     • pulls Queue-Times API                   • merges wait_times.csv into
+     • appends to wait_times.csv                 history/*.parquet
+       (rolling 10 days)                       • rebuilds data/history.json
+     • rebuilds data/live.json                   (heatmaps, best times,
+                                                  typical daily curves)
+              │                                          │
+              └──────────────┬───────────────────────────┘
+                             ▼
+                 [GitHub Pages] index.html
+          loads data/live.json + data/history.json (~200 KB)
 ```
 
-1. **Ingestion Trigger:** An external scheduler (`cron-job.org`) issues a webhook ping (`poll-disney`) every 5 minutes to trigger the GitHub Actions workflow.
-2. **Data Scraping & Pruning:** A Python runner executes `wait_time_scraper.py`, fetching live wait times and ride statuses from the public Queue-Times API endpoints.
-3. **Dual-Tier Storage Architecture:**
-* **Live Tier (`wait_times.csv`):** Dynamically pruned on every run to retain only the **most recent 14 days** (~2–4 MB). This bypasses GitHub's 100 MB single-file limit and ensures the frontend loads immediately.
-* **Historical Archive Tier (`history/`):** Historical rows are partitioned by month and saved as binary **Parquet** files (`history/wait_times_YYYY_MM.parquet`) using Snappy compression. This reduces disk storage by ~90% while maintaining an immutable raw record.
+1. **Polling (every 5 min):** `cron-job.org` sends a `poll-disney` webhook that runs `.github/workflows/poll.yml`. `wait_time_scraper.py` fetches every park, appends to `wait_times.csv` (pruned to the last 10 days), and rebuilds `data/live.json` via `build_dashboard.py`.
+2. **Archiving (daily):** `.github/workflows/archive.yml` runs on GitHub's own scheduler, so no extra cron-job.org job is needed. `archive.py` folds the CSV into the monthly Parquet files and rebuilds `data/history.json`. Each Parquet file is rewritten at most once a day, which keeps git history growth small. Because the CSV holds 10 days, a missed or late daily run loses nothing.
+3. **Dashboard:** `index.html` on GitHub Pages loads only the two precomputed JSON files, so it no longer downloads or parses the raw CSV. It refreshes itself every 5 minutes.
 
+The two workflows touch different files (`wait_times.csv` + `data/live.json` vs `history/` + `data/history.json`), so when they push at the same time a `git pull --rebase` always resolves cleanly.
 
-4. **Visualization:** Hosted on GitHub Pages via `index.html`. It parses the 14-day CSV client-side using `PapaParse` and visualizes trends using `Chart.js`.
+To rebuild both JSON files by hand: `python build_dashboard.py`.
+
+---
+
+## Self-Healing & Alerts
+
+The pipeline is built to keep running unattended and to tell you when it had to step in.
+
+**Automatic recovery**
+* **Damaged `wait_times.csv`:** the scraper skips unreadable lines (and recovers from a damaged header line). If the file is unreadable, it is moved to `quarantine/` and a fresh CSV is started, so polling never stops and nothing is deleted.
+* **Quarantined files:** the daily archive job salvages their rows into the Parquet archive and removes them. Anything it can't salvage stays in `quarantine/` for a manual look.
+* **Push races** between the two workflows are retried with `git pull --rebase`. API hiccups resolve on the next poll.
+
+**Alerts:** a GitHub Issue labeled `pipeline-health` opens when:
+* a run recovered from a problem or failed outright (both workflows), or
+* the newest data is more than 6 hours old (checked daily by the archive job), which catches polling that stopped entirely, e.g. the cron-job.org job dying.
+
+At most one alert issue is open at a time; while it is open, new problems are added as comments, at most once every 6 hours. GitHub emails you about new issues and comments. Close the issue once you've looked, and a new one opens if problems come back. Requires Issues to be enabled on the repo (Settings → General → Features).
 
 ---
 
@@ -72,36 +82,31 @@ The live `wait_times.csv` file records the following fields:
 
 ---
 
-## Key Metrics & Analytical Models
+## Dashboard
 
-The dashboard exposes two calculated operational metrics:
+* **All parks:** average posted wait per park vs. what is usual for this time, rides open/down, the longest wait, and the best ride to do right now, plus a sparkline of today vs. a typical day.
+* **Park view:**
+  * **Worth riding now:** popular rides (usually ≥ 10 min) ranked by how far below their usual wait they are.
+  * **Today vs a typical day:** park-wide average wait today, against the median and middle 50% of days over the last 4 weeks. Up to three rides can be pinned onto this chart.
+  * **Ride cards:** current wait, colored and labeled by how it compares with the usual wait for this weekday and hour, a sparkline of today (vs. the 7-day average), status ("Down since 2:15pm", "Not running now", "Not open this week"), uptime, efficiency and best time. Filter by land, search, sort, or show open rides only.
+* **Ride detail:** today vs. the last 7 days, and a weekday × hour heatmap of average waits over the last 8 weeks showing when the line is shortest. Ride detail links are shareable (`#park=…&ride=…`).
+* Light/dark theme (follows the system by default), phone-friendly layout, "updated N min ago" with a warning when data is stale.
 
-### 1. Attraction Efficiency Score (%)
+## Key Metrics
 
-Measures the return on time invested for an attraction—identifying rides with lengthy runtimes that justify moderate lines versus short attractions with high queues:
-
-$$\text{Efficiency Score} = \left( \frac{\text{Ride Duration}}{\text{Posted Standby Wait} + \text{Ride Duration}} \right) \times 100$$
-
-*Ride durations are mapped via a static lookup dictionary compiled from verified attraction telemetry (e.g., Pirates of the Caribbean = 16.0 min; Space Mountain = 3.0 min).*
-
-### 2. Operational Reliability & Uptime (%)
-
-Evaluates attraction stability across the preceding 7 days, filtering out temporary breakdowns from long-term scheduled closures:
-
-$$\text{7-Day Uptime} = \left( \frac{\sum \text{Open Snapshots}}{\sum \text{Total Recorded Snapshots}} \right) \times 100$$
-
-* **Refurbishment Detection (`REFURB`):** Attractions reporting `0%` uptime over the entire 7-day window are classified as under scheduled maintenance/refurbishment.
-* **Temporary Outage (`CLOSED`):** Attractions currently reporting `is_open = False` that have logged operational cycles within the past week are marked as mid-day breakdowns or standard closing states.
-
-### 3. Consolidated Demand Profiles
-
-The **7-Day Trends** tab normalizes the past week of measurements into a unified 24-hour composite baseline. Each 5-minute bucket calculates the true mathematical average across all 7 days to display standard daily wait time curves without single-day noise.
+* **Park operating:** a snapshot counts as "operating" when at least 25% of a park's rides report open. Overnight snapshots are excluded from uptime and averages.
+* **Usual wait:** average posted wait for that ride at the same weekday and hour over the last 8 weeks, counting only times it was open.
+* **7-Day Uptime:** open snapshots ÷ snapshots while the park was operating.
+* **Status:** *Down* = closed while the park is operating at an hour the ride normally runs; *Not running now* = closed outside its usual hours (e.g. night-only Halloween mazes) or with the park closed; *Not open this week* = no open snapshots in 7 days.
+* **Efficiency Score:** ride duration ÷ (posted wait + ride duration) × 100, using the duration table in `build_dashboard.py`.
+* **Best time:** the hour of day with the lowest average wait over 8 weeks (needs at least 24 samples).
+* Trend curves are bucketed into 15-minute slots, and only open snapshots are averaged, so closed rides don't drag averages to zero.
 
 ---
 
 ## Local Development & Querying History
 
-### Running the Scraper Manually
+### Running the Pipeline Manually
 
 Clone the repository and install the runtime dependencies:
 
@@ -109,7 +114,8 @@ Clone the repository and install the runtime dependencies:
 git clone https://github.com/KingOfTheNerds32/disney_wait_times.git
 cd disney_wait_times
 pip install requests pandas pytz pyarrow
-python wait_time_scraper.py
+python wait_time_scraper.py   # one poll
+python archive.py             # fold CSV into Parquet + rebuild history.json
 
 ```
 
@@ -139,4 +145,4 @@ print(f"Historical Average Wait: {space_mtn['wait_time'].mean():.1f} minutes")
 
 1. Ensure GitHub Actions write permissions are active under **Settings > Actions > General > Workflow permissions** (`Read and write permissions`).
 2. Verify GitHub Pages is configured under **Settings > Pages** to deploy from the `/root` directory of your `main` branch.
-3. Keep `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'` set in `.github/workflows/main.yml` to prevent runner deprecation warnings.
+3. Keep `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'` set in the workflows to prevent runner deprecation warnings.

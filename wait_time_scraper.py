@@ -1,8 +1,45 @@
 import requests
 import pandas as pd
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import os
 import pytz
+
+from build_dashboard import build_live, prepare
+from health import csv_is_usable, describe, note_problem, salvage_csv
+
+LIVE_DAYS = 10
+
+def load_existing_csv(path):
+    """Reads the live CSV, recovering from corruption instead of failing the poll.
+
+    The CSV holds rows the daily archive hasn't copied to Parquet yet, so it is never
+    simply overwritten: unreadable lines are skipped, and if the file can't be read at
+    all it is moved to quarantine/ (and committed) before starting a fresh one.
+    """
+    problem = None
+    try:
+        df = pd.read_csv(path)
+        if csv_is_usable(df):
+            return df
+        problem = 'missing or unparseable fetch_timestamp column'
+    except Exception as e:
+        problem = describe(e)
+
+    df = salvage_csv(path)
+    if df is not None:
+        with open(path, encoding='utf-8', errors='replace') as f:
+            total = sum(1 for _ in f) - 1
+        note_problem(f'{path} was partly unreadable ({problem}). Kept {len(df)} rows, '
+                     f'skipped {max(total - len(df), 0)} broken lines.')
+        return df
+
+    os.makedirs('quarantine', exist_ok=True)
+    dest = f"quarantine/wait_times_{datetime.now(timezone.utc):%Y%m%d_%H%M%S}.csv"
+    os.replace(path, dest)
+    note_problem(f'{path} could not be read ({problem}). Moved it to {dest} and started a '
+                 f'fresh file; the daily archive will try to recover its rows.')
+    return None
+
 
 def pull_wait_times():
     # Disneyland (16), DCA (17), and Universal Studios Hollywood (66)
@@ -44,12 +81,11 @@ def pull_wait_times():
         master_csv_file = 'wait_times.csv'
         
         # Load existing data
+        existing_df = None
         if os.path.exists(master_csv_file) and os.path.getsize(master_csv_file) > 0:
-            try:
-                existing_df = pd.read_csv(master_csv_file)
-                combined_df = pd.concat([existing_df, new_data_df], ignore_index=True)
-            except Exception:
-                combined_df = new_data_df
+            existing_df = load_existing_csv(master_csv_file)
+        if existing_df is not None:
+            combined_df = pd.concat([existing_df, new_data_df], ignore_index=True)
         else:
             combined_df = new_data_df
 
@@ -61,44 +97,15 @@ def pull_wait_times():
 
         combined_df.drop_duplicates(subset=['fetch_timestamp', 'ride_name'], keep='last', inplace=True)
 
-        # =========================================================================
-        # TIER 1: UPDATE HISTORICAL PARQUET ARCHIVE
-        # =========================================================================
-        os.makedirs('history', exist_ok=True)
-        combined_df['year_month'] = combined_df['fetch_timestamp'].dt.strftime('%Y_%m')
-
-        for year_month, group in combined_df.groupby('year_month'):
-            history_parquet = f'history/wait_times_{year_month}.parquet'
-            
-            if os.path.exists(history_parquet):
-                try:
-                    hist_exist = pd.read_parquet(history_parquet)
-                    hist_exist['fetch_timestamp'] = pd.to_datetime(hist_exist['fetch_timestamp'])
-                    final_hist = pd.concat([hist_exist, group], ignore_index=True)
-                except Exception:
-                    final_hist = group
-            else:
-                final_hist = group
-                
-            final_hist.drop_duplicates(subset=['fetch_timestamp', 'ride_name'], keep='last', inplace=True)
-            
-            if 'year_month' in final_hist.columns:
-                final_hist = final_hist.drop(columns=['year_month'])
-                
-            final_hist.to_parquet(history_parquet, index=False, compression='snappy')
-
-        # =========================================================================
-        # TIER 2: PRUNE LIVE DASHBOARD CSV (LAST 14 DAYS ONLY)
-        # =========================================================================
-        cutoff_date = datetime.now() - timedelta(days=14)
+        # Keep a rolling window in the CSV. The daily archive job (archive.py) moves
+        # rows into history/*.parquet, so this only needs to outlast a few missed runs
+        # while still covering the 7 days the dashboard's uptime figures use.
+        cutoff_date = now_tz.replace(tzinfo=None) - timedelta(days=LIVE_DAYS)
         live_dash_df = combined_df[combined_df['fetch_timestamp'] >= cutoff_date].copy()
-
-        if 'year_month' in live_dash_df.columns:
-            live_dash_df.drop(columns=['year_month'], inplace=True)
-
-        # This will overwrite the local 100MB file with a tiny ~2MB file before git push runs!
         live_dash_df.to_csv(master_csv_file, index=False)
-        print(f"Logged {len(all_rows)} rides. Archive built, live file shrunk successfully.")
+
+        build_live(prepare(live_dash_df))
+        print(f"Logged {len(all_rows)} rides. Live CSV and dashboard data updated.")
 
 if __name__ == "__main__":
     pull_wait_times()
