@@ -293,7 +293,9 @@ def build_live(df, tp=None):
             t = tp_snap.get(key)
             tp_status = t['status'] if t is not None else None
 
-            if tp_status == 'REFURBISHMENT' or (not ever_open and not r['is_open']):
+            # "Not open this week" needs a few days of history (e.g. a newly added park)
+            long_history = rw['ts'].min() <= latest - timedelta(days=3)
+            if tp_status == 'REFURBISHMENT' or (not ever_open and not r['is_open'] and long_history):
                 status = 'refurb'
             elif tp_status == 'OPERATING' or (tp_status is None and r['is_open']):
                 status = 'open'

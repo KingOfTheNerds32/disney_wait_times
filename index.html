@@ -284,6 +284,7 @@ const SHORT = {
     'Disneyland': 'Disneyland',
     'Disney California Adventure': 'California Adventure',
     'Universal Studios Hollywood': 'Universal Hollywood',
+    'Legoland California': 'Legoland',
 };
 
 let live = null;
@@ -499,7 +500,9 @@ function renderPark(park) {
             ${worth.length ? `<ul class="now-list">${worth.map(r => `
                 <li data-ride="${esc(r.name)}"><div><div class="name">${esc(r.name)}</div><div class="meta">${esc(r.land)}</div></div>
                 <div class="num"><b>${r.wait}m</b><div class="meta">usually ${r.typical}m</div></div></li>`).join('')}</ul>`
-              : `<p class="empty">${p.operating ? 'Nothing is running below its usual wait right now.' : 'The park is closed.'}</p>`}
+              : `<p class="empty">${!p.operating ? 'The park is closed.'
+                  : rides.some(r => r.typical != null) ? 'Nothing is running below its usual wait right now.'
+                  : 'Comparisons start once this park has a few days of history.'}</p>`}
         </div>
         <div class="card">
             <h2>Today vs a typical day</h2>
