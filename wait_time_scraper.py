@@ -45,11 +45,12 @@ def load_existing_csv(path, column_sets=None):
 
 
 def pull_wait_times():
-    # Disneyland (16), DCA (17), and Universal Studios Hollywood (66)
+    # Disneyland (16), DCA (17), Universal Studios Hollywood (66), Legoland California (279)
     parks = {
         16: "Disneyland",
         17: "Disney California Adventure",
-        66: "Universal Studios Hollywood"
+        66: "Universal Studios Hollywood",
+        279: "Legoland California",
     }
     
     all_rows = []

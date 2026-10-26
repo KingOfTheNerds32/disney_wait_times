@@ -2,7 +2,7 @@
 
 # Theme Park Telemetry & Wait Time Analytics
 
-An automated pipeline and lightweight analytics dashboard tracking live attraction wait times and operational uptime across **Disneyland**, **Disney California Adventure**, and **Universal Studios Hollywood**.
+An automated pipeline and lightweight analytics dashboard tracking live attraction wait times and operational uptime across **Disneyland**, **Disney California Adventure**, **Universal Studios Hollywood**, and **Legoland California**.
 
 The system operates entirely on free, serverless infrastructure—using an external cron trigger, GitHub Actions runners for ingestion, a dual-tier storage strategy (CSV + Parquet), and a static GitHub Pages frontend.
 
@@ -62,13 +62,14 @@ At most one alert issue is open at a time; while it is open, new problems are ad
 
 ## Monitored Destinations
 
-The scraper collects metrics for three Southern California theme parks:
+The scraper collects metrics for four Southern California theme parks:
 
 | Destination | Park ID | Included Lands / Areas |
 | --- | --- | --- |
 | **Disneyland Park** | `16` | Fantasyland, Tomorrowland, Adventureland, Frontierland, New Orleans Square, Star Wars: Galaxy's Edge, Mickey's Toontown, Bayou Country, Main Street U.S.A. |
 | **Disney California Adventure** | `17` | Cars Land, Avengers Campus, Pixar Pier, Grizzly Peak, Hollywood Land, Paradise Gardens Park, San Fransokyo Square |
 | **Universal Studios Hollywood** | `66` | Full park aggregated (Upper Lot, Lower Lot, Super Nintendo World, Wizarding World of Harry Potter, Minion Land, etc.) |
+| **Legoland California** | `279` | Full park. Standby waits and status only: neither source publishes Reserve 'N' Ride return times. |
 
 ---
 

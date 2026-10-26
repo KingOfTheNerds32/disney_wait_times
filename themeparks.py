@@ -19,6 +19,7 @@ PARKS = {
     '7340550b-c14d-4def-80bb-acdb51d49a66': 'Disneyland',
     '832fcd51-ea19-4e77-85c7-75d5843b127c': 'Disney California Adventure',
     'bc4005c5-8c7e-41d7-b349-cdddf1796427': 'Universal Studios Hollywood',
+    '722116aa-56be-4466-8c6f-a5acbac05da2': 'Legoland California',
 }
 TP_COLUMNS = ['fetch_timestamp', 'park_name', 'ride_name', 'status', 'standby_wait',
               'single_rider_wait', 'll_type', 'll_state', 'll_return_start', 'll_return_end']
