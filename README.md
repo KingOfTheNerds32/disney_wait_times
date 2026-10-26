@@ -37,6 +37,23 @@ To rebuild both JSON files by hand: `python build_dashboard.py`.
 
 ---
 
+## Self-Healing & Alerts
+
+The pipeline is built to keep running unattended and to tell you when it had to step in.
+
+**Automatic recovery**
+* **Damaged `wait_times.csv`:** the scraper skips unreadable lines (and recovers from a damaged header line). If the file is unreadable, it is moved to `quarantine/` and a fresh CSV is started, so polling never stops and nothing is deleted.
+* **Quarantined files:** the daily archive job salvages their rows into the Parquet archive and removes them. Anything it can't salvage stays in `quarantine/` for a manual look.
+* **Push races** between the two workflows are retried with `git pull --rebase`. API hiccups resolve on the next poll.
+
+**Alerts:** a GitHub Issue labeled `pipeline-health` opens when:
+* a run recovered from a problem or failed outright (both workflows), or
+* the newest data is more than 6 hours old (checked daily by the archive job), which catches polling that stopped entirely, e.g. the cron-job.org job dying.
+
+At most one alert issue is open at a time; while it is open, new problems are added as comments, at most once every 6 hours. GitHub emails you about new issues and comments. Close the issue once you've looked, and a new one opens if problems come back. Requires Issues to be enabled on the repo (Settings → General → Features).
+
+---
+
 ## Monitored Destinations
 
 The scraper collects metrics for three Southern California theme parks:

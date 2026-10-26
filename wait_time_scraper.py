@@ -1,12 +1,45 @@
 import requests
 import pandas as pd
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import os
 import pytz
 
 from build_dashboard import build_live, prepare
+from health import csv_is_usable, describe, note_problem, salvage_csv
 
 LIVE_DAYS = 10
+
+def load_existing_csv(path):
+    """Reads the live CSV, recovering from corruption instead of failing the poll.
+
+    The CSV holds rows the daily archive hasn't copied to Parquet yet, so it is never
+    simply overwritten: unreadable lines are skipped, and if the file can't be read at
+    all it is moved to quarantine/ (and committed) before starting a fresh one.
+    """
+    problem = None
+    try:
+        df = pd.read_csv(path)
+        if csv_is_usable(df):
+            return df
+        problem = 'missing or unparseable fetch_timestamp column'
+    except Exception as e:
+        problem = describe(e)
+
+    df = salvage_csv(path)
+    if df is not None:
+        with open(path, encoding='utf-8', errors='replace') as f:
+            total = sum(1 for _ in f) - 1
+        note_problem(f'{path} was partly unreadable ({problem}). Kept {len(df)} rows, '
+                     f'skipped {max(total - len(df), 0)} broken lines.')
+        return df
+
+    os.makedirs('quarantine', exist_ok=True)
+    dest = f"quarantine/wait_times_{datetime.now(timezone.utc):%Y%m%d_%H%M%S}.csv"
+    os.replace(path, dest)
+    note_problem(f'{path} could not be read ({problem}). Moved it to {dest} and started a '
+                 f'fresh file; the daily archive will try to recover its rows.')
+    return None
+
 
 def pull_wait_times():
     # Disneyland (16), DCA (17), and Universal Studios Hollywood (66)
@@ -48,10 +81,10 @@ def pull_wait_times():
         master_csv_file = 'wait_times.csv'
         
         # Load existing data
+        existing_df = None
         if os.path.exists(master_csv_file) and os.path.getsize(master_csv_file) > 0:
-            # No fallback on a read error: the CSV holds rows not yet archived, so
-            # failing the run is better than overwriting it with one snapshot.
-            existing_df = pd.read_csv(master_csv_file)
+            existing_df = load_existing_csv(master_csv_file)
+        if existing_df is not None:
             combined_df = pd.concat([existing_df, new_data_df], ignore_index=True)
         else:
             combined_df = new_data_df

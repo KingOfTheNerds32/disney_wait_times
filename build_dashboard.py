@@ -10,7 +10,7 @@ All timestamps are Pacific time, matching fetch_timestamp.
 import json
 import math
 import os
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 import pandas as pd
 import pytz

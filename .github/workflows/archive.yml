@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: write
+  issues: write   # for pipeline-health alerts
 
 concurrency:
   group: archive
@@ -41,6 +42,10 @@ jobs:
           git config --global user.email "bot@github.com"
 
           git add history/ data/history.json
+          # Stage quarantined CSVs (or their removal once archived), if any
+          if [ -d quarantine ] || git ls-files --error-unmatch quarantine >/dev/null 2>&1; then
+            git add -A quarantine/
+          fi
           git commit -m "Archive wait times and rebuild history [skip ci]" || exit 0
 
           # Polls push every 5 minutes but never touch these files, so rebasing is clean.
@@ -49,3 +54,9 @@ jobs:
             sleep $((i * 5))
           done
           exit 1
+
+      - name: Report problems
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash .github/scripts/report_problems.sh "${{ job.status }}"

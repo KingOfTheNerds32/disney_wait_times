@@ -7,8 +7,9 @@ on:
     types: [poll-disney]
   workflow_dispatch:        # Allows manual trigger
 
-permissions: 
+permissions:
   contents: write
+  issues: write   # for pipeline-health alerts
 
 # Never run two polls at once; a queued poll waits for the running one.
 concurrency:
@@ -45,6 +46,10 @@ jobs:
           git config --global user.email "bot@github.com"
           
           git add wait_times.csv data/live.json
+          # Stage quarantined CSVs (or their removal once archived), if any
+          if [ -d quarantine ] || git ls-files --error-unmatch quarantine >/dev/null 2>&1; then
+            git add -A quarantine/
+          fi
           git commit -m "Update wait times [skip ci]" || exit 0
 
           # The daily archive job may have pushed in the meantime; it touches different
@@ -54,3 +59,9 @@ jobs:
             sleep $((i * 5))
           done
           exit 1
+
+      - name: Report problems
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash .github/scripts/report_problems.sh "${{ job.status }}"
