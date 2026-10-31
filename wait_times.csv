@@ -1,230 +1,4 @@
 fetch_timestamp,park_name,land,ride_id,ride_name,wait_time,is_open,last_updated
-2026-10-20 18:15:27,Disneyland,Adventureland,,Adventureland Treehouse inspired by Walt Disney’s Swiss Family Robinson,0,True,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disneyland,Adventureland,,Indiana Jones™ Adventure,0,False,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disneyland,Adventureland,,Jungle Cruise,20,True,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disneyland,Adventureland,,Walt Disney's Enchanted Tiki Room,0,True,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disneyland,Bayou Country,,Davy Crockett's Explorer Canoes,0,False,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disneyland,Bayou Country,,The Many Adventures of Winnie the Pooh,20,True,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disneyland,Bayou Country,,Tiana's Bayou Adventure,30,True,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disneyland,Bayou Country,,Tiana's Bayou Adventure Single Rider,0,True,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disneyland,Fantasyland,,"""it's a small world""",5,True,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disneyland,Fantasyland,,Alice in Wonderland,20,True,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disneyland,Fantasyland,,Bluey’s Best Day Ever! at Fantasyland Theatre,0,True,2026-10-14T09:20:48.000Z
-2026-10-20 18:15:27,Disneyland,Fantasyland,,Casey Jr. Circus Train,10,True,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disneyland,Fantasyland,,Dumbo the Flying Elephant,20,True,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disneyland,Fantasyland,,King Arthur Carrousel,5,True,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disneyland,Fantasyland,,Mad Tea Party,5,True,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disneyland,Fantasyland,,Matterhorn Bobsleds,20,True,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disneyland,Fantasyland,,Meet Disney Princesses at Royal Hall,0,False,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disneyland,Fantasyland,,Mr. Toad's Wild Ride,20,True,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disneyland,Fantasyland,,Peter Pan's Flight,30,True,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disneyland,Fantasyland,,Pinocchio's Daring Journey,10,True,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disneyland,Fantasyland,,Sleeping Beauty Castle Walkthrough,0,False,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disneyland,Fantasyland,,Snow White's Enchanted Wish,15,True,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disneyland,Fantasyland,,Storybook Land Canal Boats,20,True,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disneyland,Frontierland,,Big Thunder Mountain Railroad,20,True,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disneyland,Frontierland,,Frontierland Shootin' Exposition,0,True,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disneyland,Frontierland,,Mark Twain Riverboat,10,True,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disneyland,Frontierland,,Pirate's Lair on Tom Sawyer Island,0,False,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disneyland,Frontierland,,Sailing Ship Columbia,0,False,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disneyland,Main Street U.S.A,,Disneyland Railroad,10,True,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disneyland,Main Street U.S.A,,Great Moments with Mr. Lincoln,0,False,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disneyland,Main Street U.S.A,,Main Street Cinema,0,True,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disneyland,Main Street U.S.A,,Main Street Vehicles,0,False,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disneyland,Main Street U.S.A,,Opera House - Walt Disney - A Magical Life,0,True,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disneyland,Main Street U.S.A,,The Disney Gallery,0,True,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disneyland,Main Street U.S.A,,Walt Disney - A Magical Life,0,True,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disneyland,Mickey's Toontown,,Chip 'n' Dale's GADGETcoaster,20,True,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disneyland,Mickey's Toontown,,Donald's Duck Pond,0,True,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disneyland,Mickey's Toontown,,Goofy's How-to-Play Yard,0,True,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disneyland,Mickey's Toontown,,Mickey & Minnie's Runaway Railway,40,True,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disneyland,Mickey's Toontown,,Mickey's House and Meet Mickey Mouse,30,True,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disneyland,Mickey's Toontown,,Minnie's House,0,True,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disneyland,Mickey's Toontown,,Roger Rabbit's Car Toon Spin,40,True,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disneyland,New Orleans Square,,Haunted Mansion Holiday,55,True,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disneyland,New Orleans Square,,Pirates of the Caribbean,20,True,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disneyland,Star Wars: Galaxy's Edge,,Millennium Falcon: Smugglers Run,15,True,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disneyland,Star Wars: Galaxy's Edge,,Millennium Falcon: Smugglers Run Single Rider,0,True,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disneyland,Star Wars: Galaxy's Edge,,Star Wars: Rise of the Resistance,40,True,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disneyland,Tomorrowland,,Astro Orbitor,20,True,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disneyland,Tomorrowland,,Autopia,30,True,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disneyland,Tomorrowland,,Buzz Lightyear Astro Blasters,25,True,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disneyland,Tomorrowland,,Disneyland Monorail,5,True,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disneyland,Tomorrowland,,Finding Nemo Submarine Voyage,25,True,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disneyland,Tomorrowland,,Pixar Short Film Spotlight,0,False,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disneyland,Tomorrowland,,Space Mountain,45,True,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disneyland,Tomorrowland,,Star Tours - The Adventures Continue,10,True,2026-10-21T01:11:47.000Z
-2026-10-20 18:15:27,Disney California Adventure,Avengers Campus,,Guardians of the Galaxy - Mission: BREAKOUT!,0,False,2026-10-21T01:11:54.000Z
-2026-10-20 18:15:27,Disney California Adventure,Avengers Campus,,WEB SLINGERS: A Spider-Man Adventure,15,True,2026-10-21T01:11:54.000Z
-2026-10-20 18:15:27,Disney California Adventure,Avengers Campus,,WEB SLINGERS: A Spider-Man Adventure Single Rider,0,True,2026-10-21T01:11:54.000Z
-2026-10-20 18:15:27,Disney California Adventure,Cars Land,,Luigi's Honkin' Haul-O-Ween,15,True,2026-10-21T01:11:54.000Z
-2026-10-20 18:15:27,Disney California Adventure,Cars Land,,Radiator Springs Racers,40,True,2026-10-21T01:11:54.000Z
-2026-10-20 18:15:27,Disney California Adventure,Cars Land,,Radiator Springs Racers Single Rider,0,True,2026-10-21T01:11:54.000Z
-2026-10-20 18:15:27,Disney California Adventure,Grizzly Peak,,Grizzly River Run,5,True,2026-10-21T01:11:54.000Z
-2026-10-20 18:15:27,Disney California Adventure,Grizzly Peak,,Redwood Creek Challenge Trail,0,False,2026-10-21T01:11:54.000Z
-2026-10-20 18:15:27,Disney California Adventure,Grizzly Peak,,Soarin’ Across America,15,True,2026-10-21T01:11:54.000Z
-2026-10-20 18:15:27,Disney California Adventure,Hollywood Land,,Animation Academy,0,False,2026-10-21T01:11:54.000Z
-2026-10-20 18:15:27,Disney California Adventure,Hollywood Land,,Mickey's PhilharMagic,0,False,2026-10-21T01:11:54.000Z
-2026-10-20 18:15:27,Disney California Adventure,Hollywood Land,,"Monsters, Inc. Mike & Sulley to the Rescue!",10,True,2026-10-21T01:11:54.000Z
-2026-10-20 18:15:27,Disney California Adventure,Hollywood Land,,Sorcerer's Workshop,0,False,2026-10-21T01:11:54.000Z
-2026-10-20 18:15:27,Disney California Adventure,Hollywood Land,,Turtle Talk with Crush,0,False,2026-10-21T01:11:54.000Z
-2026-10-20 18:15:27,Disney California Adventure,Pacific Wharf,,The Bakery Tour,0,False,2026-10-21T01:11:54.000Z
-2026-10-20 18:15:27,Disney California Adventure,Paradise Gardens Park,,Golden Zephyr,5,True,2026-10-21T01:11:54.000Z
-2026-10-20 18:15:27,Disney California Adventure,Paradise Gardens Park,,Goofy's Sky School,10,True,2026-10-21T01:11:54.000Z
-2026-10-20 18:15:27,Disney California Adventure,Paradise Gardens Park,,Silly Symphony Swings,5,True,2026-10-21T01:11:54.000Z
-2026-10-20 18:15:27,Disney California Adventure,Paradise Gardens Park,,Silly Symphony Swings Single Rider,0,True,2026-10-21T01:11:54.000Z
-2026-10-20 18:15:27,Disney California Adventure,Paradise Gardens Park,,The Little Mermaid - Ariel's Undersea Adventure,5,True,2026-10-21T01:11:54.000Z
-2026-10-20 18:15:27,Disney California Adventure,Paradise Gardens Park,,World of Color – ONE,0,False,2026-10-21T01:11:54.000Z
-2026-10-20 18:15:27,Disney California Adventure,Pixar Pier,,Games of Pixar Pier,0,False,2026-10-21T01:11:54.000Z
-2026-10-20 18:15:27,Disney California Adventure,Pixar Pier,,Incredicoaster,10,True,2026-10-21T01:11:54.000Z
-2026-10-20 18:15:27,Disney California Adventure,Pixar Pier,,Incredicoaster Single Rider,0,True,2026-10-21T01:11:54.000Z
-2026-10-20 18:15:27,Disney California Adventure,Pixar Pier,,Inside Out Emotional Whirlwind,25,True,2026-10-21T01:11:54.000Z
-2026-10-20 18:15:27,Disney California Adventure,Pixar Pier,,Jessie's Critter Carousel,5,True,2026-10-21T01:11:54.000Z
-2026-10-20 18:15:27,Disney California Adventure,Pixar Pier,,Jumpin' Jellyfish,5,True,2026-10-21T01:11:54.000Z
-2026-10-20 18:15:27,Disney California Adventure,Pixar Pier,,Pixar Pal-A-Round - Swinging,15,True,2026-10-21T01:11:54.000Z
-2026-10-20 18:15:27,Disney California Adventure,Pixar Pier,,Pixar Pal-A-Round – Non-Swinging,20,True,2026-10-21T01:11:54.000Z
-2026-10-20 18:15:27,Disney California Adventure,Pixar Pier,,Toy Story Midway Mania!,30,True,2026-10-21T01:11:54.000Z
-2026-10-20 18:15:27,Disney California Adventure,Halloween,,Guardians of the Galaxy - Monsters After Dark,35,True,2026-10-21T01:11:54.000Z
-2026-10-20 18:15:27,Disney California Adventure,Halloween,,Mater's Graveyard JamBOOree,15,True,2026-10-21T01:11:54.000Z
-2026-10-20 18:15:27,Disney California Adventure,Halloween,,Villains Grove at Oogie Boogie Bash,0,False,2026-10-21T01:11:54.000Z
-2026-10-20 18:15:27,Universal Studios Hollywood,Jurassic World,,DinoPlay,0,False,2026-10-21T01:12:30.000Z
-2026-10-20 18:15:27,Universal Studios Hollywood,Jurassic World,,Jurassic World - The Ride,0,False,2026-10-21T01:12:30.000Z
-2026-10-20 18:15:27,Universal Studios Hollywood,Lower Lot,,Revenge of the Mummy – The Ride,0,False,2026-10-21T01:12:30.000Z
-2026-10-20 18:15:27,Universal Studios Hollywood,Minion Land,,Despicable Me Minion Mayhem,0,False,2026-10-21T01:12:30.000Z
-2026-10-20 18:15:27,Universal Studios Hollywood,Minion Land,,Silly Swirly,0,False,2026-10-21T01:12:30.000Z
-2026-10-20 18:15:27,Universal Studios Hollywood,Minion Land,,The Secret Life of Pets: Off the Leash,0,False,2026-10-21T01:12:30.000Z
-2026-10-20 18:15:27,Universal Studios Hollywood,Production Plaza,,Kung Fu Panda Adventure,0,False,2026-10-21T01:12:30.000Z
-2026-10-20 18:15:27,Universal Studios Hollywood,"Springfield, U.S.A.",,The Simpsons Ride™,0,False,2026-10-21T01:12:30.000Z
-2026-10-20 18:15:27,Universal Studios Hollywood,SUPER NINTENDO WORLD,,Bowser Jr. Challenge,0,False,2026-10-21T01:12:30.000Z
-2026-10-20 18:15:27,Universal Studios Hollywood,SUPER NINTENDO WORLD,,Mario Kart™: Bowser’s Challenge,0,False,2026-10-21T01:12:30.000Z
-2026-10-20 18:15:27,Universal Studios Hollywood,The Wizarding World of Harry Potter,,Flight of the Hippogriff™,0,False,2026-10-21T01:12:30.000Z
-2026-10-20 18:15:27,Universal Studios Hollywood,The Wizarding World of Harry Potter,,Harry Potter and the Forbidden Journey™,0,False,2026-10-21T01:12:30.000Z
-2026-10-20 18:15:27,Universal Studios Hollywood,The Wizarding World of Harry Potter,,Ollivanders™,0,False,2026-10-21T01:12:30.000Z
-2026-10-20 18:15:27,Universal Studios Hollywood,TRANSFORMERS Metrobase,,TRANSFORMERS™: The Ride-3D,0,False,2026-10-21T01:12:30.000Z
-2026-10-20 18:15:27,Universal Studios Hollywood,Upper Lot,,Fast & Furious: Hollywood Drift,0,False,2026-10-21T01:12:30.000Z
-2026-10-20 18:15:27,Universal Studios Hollywood,Upper Lot,,Studio Tour,0,False,2026-10-21T01:12:30.000Z
-2026-10-20 18:15:27,Universal Studios Hollywood,Halloween,,Dead Deader Deadest,0,False,2026-10-21T01:12:30.000Z
-2026-10-20 18:15:27,Universal Studios Hollywood,Halloween,,Evil Dead Burn,0,False,2026-10-21T01:12:30.000Z
-2026-10-20 18:15:27,Universal Studios Hollywood,Halloween,,Hellraiser,0,False,2026-10-21T01:12:30.000Z
-2026-10-20 18:15:27,Universal Studios Hollywood,Halloween,,Killceañera: Music by SLASH,0,False,2026-10-21T01:12:30.000Z
-2026-10-20 18:15:27,Universal Studios Hollywood,Halloween,,Killer Klowns from Outer Space,0,False,2026-10-21T01:12:30.000Z
-2026-10-20 18:15:27,Universal Studios Hollywood,Halloween,,Ozzy Osbourne: Prince of Darkness,0,False,2026-10-21T01:12:30.000Z
-2026-10-20 18:15:27,Universal Studios Hollywood,Halloween,,Sinners,0,False,2026-10-21T01:12:30.000Z
-2026-10-20 18:15:27,Universal Studios Hollywood,Halloween,,Stranger Things 5,0,False,2026-10-21T01:12:30.000Z
-2026-10-20 18:15:27,Universal Studios Hollywood,Halloween,,Terror Tram starring Art the Clown,0,False,2026-10-21T01:12:30.000Z
-2026-10-20 18:20:26,Disneyland,Adventureland,,Adventureland Treehouse inspired by Walt Disney’s Swiss Family Robinson,0,True,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disneyland,Adventureland,,Indiana Jones™ Adventure,0,False,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disneyland,Adventureland,,Jungle Cruise,20,True,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disneyland,Adventureland,,Walt Disney's Enchanted Tiki Room,0,True,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disneyland,Bayou Country,,Davy Crockett's Explorer Canoes,0,False,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disneyland,Bayou Country,,The Many Adventures of Winnie the Pooh,20,True,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disneyland,Bayou Country,,Tiana's Bayou Adventure,20,True,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disneyland,Bayou Country,,Tiana's Bayou Adventure Single Rider,0,True,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disneyland,Fantasyland,,"""it's a small world""",5,True,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disneyland,Fantasyland,,Alice in Wonderland,30,True,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disneyland,Fantasyland,,Bluey’s Best Day Ever! at Fantasyland Theatre,0,True,2026-10-14T09:20:48.000Z
-2026-10-20 18:20:26,Disneyland,Fantasyland,,Casey Jr. Circus Train,10,True,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disneyland,Fantasyland,,Dumbo the Flying Elephant,20,True,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disneyland,Fantasyland,,King Arthur Carrousel,5,True,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disneyland,Fantasyland,,Mad Tea Party,5,True,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disneyland,Fantasyland,,Matterhorn Bobsleds,20,True,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disneyland,Fantasyland,,Meet Disney Princesses at Royal Hall,0,False,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disneyland,Fantasyland,,Mr. Toad's Wild Ride,20,True,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disneyland,Fantasyland,,Peter Pan's Flight,30,True,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disneyland,Fantasyland,,Pinocchio's Daring Journey,10,True,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disneyland,Fantasyland,,Sleeping Beauty Castle Walkthrough,0,False,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disneyland,Fantasyland,,Snow White's Enchanted Wish,15,True,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disneyland,Fantasyland,,Storybook Land Canal Boats,20,True,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disneyland,Frontierland,,Big Thunder Mountain Railroad,25,True,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disneyland,Frontierland,,Frontierland Shootin' Exposition,0,True,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disneyland,Frontierland,,Mark Twain Riverboat,10,True,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disneyland,Frontierland,,Pirate's Lair on Tom Sawyer Island,0,False,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disneyland,Frontierland,,Sailing Ship Columbia,0,False,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disneyland,Main Street U.S.A,,Disneyland Railroad,10,True,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disneyland,Main Street U.S.A,,Great Moments with Mr. Lincoln,0,False,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disneyland,Main Street U.S.A,,Main Street Cinema,0,True,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disneyland,Main Street U.S.A,,Main Street Vehicles,0,False,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disneyland,Main Street U.S.A,,Opera House - Walt Disney - A Magical Life,0,True,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disneyland,Main Street U.S.A,,The Disney Gallery,0,True,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disneyland,Main Street U.S.A,,Walt Disney - A Magical Life,0,True,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disneyland,Mickey's Toontown,,Chip 'n' Dale's GADGETcoaster,20,True,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disneyland,Mickey's Toontown,,Donald's Duck Pond,0,True,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disneyland,Mickey's Toontown,,Goofy's How-to-Play Yard,0,True,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disneyland,Mickey's Toontown,,Mickey & Minnie's Runaway Railway,40,True,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disneyland,Mickey's Toontown,,Mickey's House and Meet Mickey Mouse,30,True,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disneyland,Mickey's Toontown,,Minnie's House,0,True,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disneyland,Mickey's Toontown,,Roger Rabbit's Car Toon Spin,40,True,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disneyland,New Orleans Square,,Haunted Mansion Holiday,55,True,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disneyland,New Orleans Square,,Pirates of the Caribbean,20,True,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disneyland,Star Wars: Galaxy's Edge,,Millennium Falcon: Smugglers Run,15,True,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disneyland,Star Wars: Galaxy's Edge,,Millennium Falcon: Smugglers Run Single Rider,0,True,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disneyland,Star Wars: Galaxy's Edge,,Star Wars: Rise of the Resistance,30,True,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disneyland,Tomorrowland,,Astro Orbitor,20,True,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disneyland,Tomorrowland,,Autopia,20,True,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disneyland,Tomorrowland,,Buzz Lightyear Astro Blasters,25,True,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disneyland,Tomorrowland,,Disneyland Monorail,5,True,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disneyland,Tomorrowland,,Finding Nemo Submarine Voyage,25,True,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disneyland,Tomorrowland,,Pixar Short Film Spotlight,0,False,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disneyland,Tomorrowland,,Space Mountain,45,True,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disneyland,Tomorrowland,,Star Tours - The Adventures Continue,10,True,2026-10-21T01:15:38.000Z
-2026-10-20 18:20:26,Disney California Adventure,Avengers Campus,,Guardians of the Galaxy - Mission: BREAKOUT!,0,False,2026-10-21T01:15:39.000Z
-2026-10-20 18:20:26,Disney California Adventure,Avengers Campus,,WEB SLINGERS: A Spider-Man Adventure,15,True,2026-10-21T01:15:39.000Z
-2026-10-20 18:20:26,Disney California Adventure,Avengers Campus,,WEB SLINGERS: A Spider-Man Adventure Single Rider,0,True,2026-10-21T01:15:39.000Z
-2026-10-20 18:20:26,Disney California Adventure,Cars Land,,Luigi's Honkin' Haul-O-Ween,15,True,2026-10-21T01:15:39.000Z
-2026-10-20 18:20:26,Disney California Adventure,Cars Land,,Radiator Springs Racers,30,True,2026-10-21T01:15:39.000Z
-2026-10-20 18:20:26,Disney California Adventure,Cars Land,,Radiator Springs Racers Single Rider,0,True,2026-10-21T01:15:39.000Z
-2026-10-20 18:20:26,Disney California Adventure,Grizzly Peak,,Grizzly River Run,5,True,2026-10-21T01:15:39.000Z
-2026-10-20 18:20:26,Disney California Adventure,Grizzly Peak,,Redwood Creek Challenge Trail,0,False,2026-10-21T01:15:39.000Z
-2026-10-20 18:20:26,Disney California Adventure,Grizzly Peak,,Soarin’ Across America,15,True,2026-10-21T01:15:39.000Z
-2026-10-20 18:20:26,Disney California Adventure,Hollywood Land,,Animation Academy,0,False,2026-10-21T01:15:39.000Z
-2026-10-20 18:20:26,Disney California Adventure,Hollywood Land,,Mickey's PhilharMagic,0,False,2026-10-21T01:15:39.000Z
-2026-10-20 18:20:26,Disney California Adventure,Hollywood Land,,"Monsters, Inc. Mike & Sulley to the Rescue!",10,True,2026-10-21T01:15:39.000Z
-2026-10-20 18:20:26,Disney California Adventure,Hollywood Land,,Sorcerer's Workshop,0,False,2026-10-21T01:15:39.000Z
-2026-10-20 18:20:26,Disney California Adventure,Hollywood Land,,Turtle Talk with Crush,0,False,2026-10-21T01:15:39.000Z
-2026-10-20 18:20:26,Disney California Adventure,Pacific Wharf,,The Bakery Tour,0,False,2026-10-21T01:15:39.000Z
-2026-10-20 18:20:26,Disney California Adventure,Paradise Gardens Park,,Golden Zephyr,5,True,2026-10-21T01:15:39.000Z
-2026-10-20 18:20:26,Disney California Adventure,Paradise Gardens Park,,Goofy's Sky School,10,True,2026-10-21T01:15:39.000Z
-2026-10-20 18:20:26,Disney California Adventure,Paradise Gardens Park,,Silly Symphony Swings,5,True,2026-10-21T01:15:39.000Z
-2026-10-20 18:20:26,Disney California Adventure,Paradise Gardens Park,,Silly Symphony Swings Single Rider,0,True,2026-10-21T01:15:39.000Z
-2026-10-20 18:20:26,Disney California Adventure,Paradise Gardens Park,,The Little Mermaid - Ariel's Undersea Adventure,5,True,2026-10-21T01:15:39.000Z
-2026-10-20 18:20:26,Disney California Adventure,Paradise Gardens Park,,World of Color – ONE,0,False,2026-10-21T01:15:39.000Z
-2026-10-20 18:20:26,Disney California Adventure,Pixar Pier,,Games of Pixar Pier,0,False,2026-10-21T01:15:39.000Z
-2026-10-20 18:20:26,Disney California Adventure,Pixar Pier,,Incredicoaster,10,True,2026-10-21T01:15:39.000Z
-2026-10-20 18:20:26,Disney California Adventure,Pixar Pier,,Incredicoaster Single Rider,0,True,2026-10-21T01:15:39.000Z
-2026-10-20 18:20:26,Disney California Adventure,Pixar Pier,,Inside Out Emotional Whirlwind,25,True,2026-10-21T01:15:39.000Z
-2026-10-20 18:20:26,Disney California Adventure,Pixar Pier,,Jessie's Critter Carousel,5,True,2026-10-21T01:15:39.000Z
-2026-10-20 18:20:26,Disney California Adventure,Pixar Pier,,Jumpin' Jellyfish,5,True,2026-10-21T01:15:39.000Z
-2026-10-20 18:20:26,Disney California Adventure,Pixar Pier,,Pixar Pal-A-Round - Swinging,15,True,2026-10-21T01:15:39.000Z
-2026-10-20 18:20:26,Disney California Adventure,Pixar Pier,,Pixar Pal-A-Round – Non-Swinging,20,True,2026-10-21T01:15:39.000Z
-2026-10-20 18:20:26,Disney California Adventure,Pixar Pier,,Toy Story Midway Mania!,15,True,2026-10-21T01:15:39.000Z
-2026-10-20 18:20:26,Disney California Adventure,Halloween,,Guardians of the Galaxy - Monsters After Dark,25,True,2026-10-21T01:15:39.000Z
-2026-10-20 18:20:26,Disney California Adventure,Halloween,,Mater's Graveyard JamBOOree,10,True,2026-10-21T01:15:39.000Z
-2026-10-20 18:20:26,Disney California Adventure,Halloween,,Villains Grove at Oogie Boogie Bash,0,False,2026-10-21T01:15:39.000Z
-2026-10-20 18:20:26,Universal Studios Hollywood,Jurassic World,,DinoPlay,0,False,2026-10-21T01:17:24.000Z
-2026-10-20 18:20:26,Universal Studios Hollywood,Jurassic World,,Jurassic World - The Ride,0,False,2026-10-21T01:17:24.000Z
-2026-10-20 18:20:26,Universal Studios Hollywood,Lower Lot,,Revenge of the Mummy – The Ride,0,False,2026-10-21T01:17:24.000Z
-2026-10-20 18:20:26,Universal Studios Hollywood,Minion Land,,Despicable Me Minion Mayhem,0,False,2026-10-21T01:17:24.000Z
-2026-10-20 18:20:26,Universal Studios Hollywood,Minion Land,,Silly Swirly,0,False,2026-10-21T01:17:24.000Z
-2026-10-20 18:20:26,Universal Studios Hollywood,Minion Land,,The Secret Life of Pets: Off the Leash,0,False,2026-10-21T01:17:24.000Z
-2026-10-20 18:20:26,Universal Studios Hollywood,Production Plaza,,Kung Fu Panda Adventure,0,False,2026-10-21T01:17:24.000Z
-2026-10-20 18:20:26,Universal Studios Hollywood,"Springfield, U.S.A.",,The Simpsons Ride™,0,False,2026-10-21T01:17:24.000Z
-2026-10-20 18:20:26,Universal Studios Hollywood,SUPER NINTENDO WORLD,,Bowser Jr. Challenge,0,False,2026-10-21T01:17:24.000Z
-2026-10-20 18:20:26,Universal Studios Hollywood,SUPER NINTENDO WORLD,,Mario Kart™: Bowser’s Challenge,0,False,2026-10-21T01:17:24.000Z
-2026-10-20 18:20:26,Universal Studios Hollywood,The Wizarding World of Harry Potter,,Flight of the Hippogriff™,0,False,2026-10-21T01:17:24.000Z
-2026-10-20 18:20:26,Universal Studios Hollywood,The Wizarding World of Harry Potter,,Harry Potter and the Forbidden Journey™,0,False,2026-10-21T01:17:24.000Z
-2026-10-20 18:20:26,Universal Studios Hollywood,The Wizarding World of Harry Potter,,Ollivanders™,0,False,2026-10-21T01:17:24.000Z
-2026-10-20 18:20:26,Universal Studios Hollywood,TRANSFORMERS Metrobase,,TRANSFORMERS™: The Ride-3D,0,False,2026-10-21T01:17:24.000Z
-2026-10-20 18:20:26,Universal Studios Hollywood,Upper Lot,,Fast & Furious: Hollywood Drift,0,False,2026-10-21T01:17:24.000Z
-2026-10-20 18:20:26,Universal Studios Hollywood,Upper Lot,,Studio Tour,0,False,2026-10-21T01:17:24.000Z
-2026-10-20 18:20:26,Universal Studios Hollywood,Halloween,,Dead Deader Deadest,0,False,2026-10-21T01:17:24.000Z
-2026-10-20 18:20:26,Universal Studios Hollywood,Halloween,,Evil Dead Burn,0,False,2026-10-21T01:17:24.000Z
-2026-10-20 18:20:26,Universal Studios Hollywood,Halloween,,Hellraiser,0,False,2026-10-21T01:17:24.000Z
-2026-10-20 18:20:26,Universal Studios Hollywood,Halloween,,Killceañera: Music by SLASH,0,False,2026-10-21T01:17:24.000Z
-2026-10-20 18:20:26,Universal Studios Hollywood,Halloween,,Killer Klowns from Outer Space,0,False,2026-10-21T01:17:24.000Z
-2026-10-20 18:20:26,Universal Studios Hollywood,Halloween,,Ozzy Osbourne: Prince of Darkness,0,False,2026-10-21T01:17:24.000Z
-2026-10-20 18:20:26,Universal Studios Hollywood,Halloween,,Sinners,0,False,2026-10-21T01:17:24.000Z
-2026-10-20 18:20:26,Universal Studios Hollywood,Halloween,,Stranger Things 5,0,False,2026-10-21T01:17:24.000Z
-2026-10-20 18:20:26,Universal Studios Hollywood,Halloween,,Terror Tram starring Art the Clown,0,False,2026-10-21T01:17:24.000Z
 2026-10-20 18:25:25,Disneyland,Adventureland,,Adventureland Treehouse inspired by Walt Disney’s Swiss Family Robinson,0,True,2026-10-21T01:21:03.000Z
 2026-10-20 18:25:25,Disneyland,Adventureland,,Indiana Jones™ Adventure,0,False,2026-10-21T01:21:03.000Z
 2026-10-20 18:25:25,Disneyland,Adventureland,,Jungle Cruise,20,True,2026-10-21T01:21:03.000Z
@@ -280016,3 +279790,142 @@ fetch_timestamp,park_name,land,ride_id,ride_name,wait_time,is_open,last_updated
 2026-10-30 18:15:25,Legoland California,THE LEGO® MOVIE™ WORLD,,Emmet's Flying Adventure Ride,0,False,2026-10-31T01:14:08.000Z
 2026-10-30 18:15:25,Legoland California,THE LEGO® MOVIE™ WORLD,,Queen Watevra’s Carousel,0,False,2026-10-31T01:14:08.000Z
 2026-10-30 18:15:25,Legoland California,THE LEGO® MOVIE™ WORLD,,Unikitty's Disco Drop,0,False,2026-10-31T01:14:08.000Z
+2026-10-30 18:20:31,Disneyland,Adventureland,,Adventureland Treehouse inspired by Walt Disney’s Swiss Family Robinson,0,True,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disneyland,Adventureland,,Indiana Jones™ Adventure,50,True,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disneyland,Adventureland,,Jungle Cruise,20,True,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disneyland,Adventureland,,Walt Disney's Enchanted Tiki Room,0,True,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disneyland,Bayou Country,,Davy Crockett's Explorer Canoes,0,False,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disneyland,Bayou Country,,The Many Adventures of Winnie the Pooh,25,True,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disneyland,Bayou Country,,Tiana's Bayou Adventure,0,False,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disneyland,Bayou Country,,Tiana's Bayou Adventure Single Rider,0,False,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disneyland,Fantasyland,,"""it's a small world""",0,False,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disneyland,Fantasyland,,Alice in Wonderland,25,True,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disneyland,Fantasyland,,Casey Jr. Circus Train,5,True,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disneyland,Fantasyland,,Dumbo the Flying Elephant,25,True,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disneyland,Fantasyland,,King Arthur Carrousel,5,True,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disneyland,Fantasyland,,Mad Tea Party,10,True,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disneyland,Fantasyland,,Matterhorn Bobsleds,35,True,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disneyland,Fantasyland,,Meet Disney Princesses at Royal Hall,0,False,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disneyland,Fantasyland,,Mr. Toad's Wild Ride,15,True,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disneyland,Fantasyland,,Peter Pan's Flight,30,True,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disneyland,Fantasyland,,Pinocchio's Daring Journey,10,True,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disneyland,Fantasyland,,Sleeping Beauty Castle Walkthrough,0,True,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disneyland,Fantasyland,,Snow White's Enchanted Wish,10,True,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disneyland,Fantasyland,,Storybook Land Canal Boats,15,True,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disneyland,Frontierland,,Big Thunder Mountain Railroad,45,True,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disneyland,Frontierland,,Frontierland Shootin' Exposition,0,True,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disneyland,Frontierland,,Mark Twain Riverboat,0,False,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disneyland,Frontierland,,Pirate's Lair on Tom Sawyer Island,0,False,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disneyland,Frontierland,,Sailing Ship Columbia,0,False,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disneyland,Main Street U.S.A,,Disneyland Railroad,5,True,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disneyland,Main Street U.S.A,,Great Moments with Mr. Lincoln,0,False,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disneyland,Main Street U.S.A,,Main Street Cinema,0,True,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disneyland,Main Street U.S.A,,Main Street Vehicles,0,False,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disneyland,Main Street U.S.A,,Opera House - Walt Disney - A Magical Life,0,True,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disneyland,Main Street U.S.A,,The Disney Gallery,0,True,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disneyland,Main Street U.S.A,,Walt Disney - A Magical Life,0,True,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disneyland,Mickey's Toontown,,Chip 'n' Dale's GADGETcoaster,20,True,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disneyland,Mickey's Toontown,,Donald's Duck Pond,0,True,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disneyland,Mickey's Toontown,,Goofy's How-to-Play Yard,0,True,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disneyland,Mickey's Toontown,,Mickey & Minnie's Runaway Railway,45,True,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disneyland,Mickey's Toontown,,Mickey's House and Meet Mickey Mouse,45,True,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disneyland,Mickey's Toontown,,Minnie's House,0,True,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disneyland,Mickey's Toontown,,Roger Rabbit's Car Toon Spin,0,False,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disneyland,New Orleans Square,,Haunted Mansion Holiday,55,True,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disneyland,New Orleans Square,,Pirates of the Caribbean,20,True,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disneyland,Star Wars: Galaxy's Edge,,Millennium Falcon: Smugglers Run,15,True,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disneyland,Star Wars: Galaxy's Edge,,Millennium Falcon: Smugglers Run Single Rider,0,True,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disneyland,Star Wars: Galaxy's Edge,,Star Wars: Rise of the Resistance,55,True,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disneyland,Tomorrowland,,Astro Orbitor,25,True,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disneyland,Tomorrowland,,Autopia,20,True,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disneyland,Tomorrowland,,Buzz Lightyear Astro Blasters,25,True,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disneyland,Tomorrowland,,Disneyland Monorail,5,True,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disneyland,Tomorrowland,,Finding Nemo Submarine Voyage,15,True,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disneyland,Tomorrowland,,Pixar Short Film Spotlight,0,True,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disneyland,Tomorrowland,,Space Mountain,40,True,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disneyland,Tomorrowland,,Star Tours - The Adventures Continue,20,True,2026-10-31T01:15:32.000Z
+2026-10-30 18:20:31,Disney California Adventure,Avengers Campus,,Guardians of the Galaxy - Mission: BREAKOUT!,0,False,2026-10-31T01:15:39.000Z
+2026-10-30 18:20:31,Disney California Adventure,Avengers Campus,,WEB SLINGERS: A Spider-Man Adventure,45,True,2026-10-31T01:15:39.000Z
+2026-10-30 18:20:31,Disney California Adventure,Avengers Campus,,WEB SLINGERS: A Spider-Man Adventure Single Rider,0,True,2026-10-31T01:15:39.000Z
+2026-10-30 18:20:31,Disney California Adventure,Cars Land,,Luigi's Honkin' Haul-O-Ween,30,True,2026-10-31T01:15:39.000Z
+2026-10-30 18:20:31,Disney California Adventure,Cars Land,,Radiator Springs Racers,80,True,2026-10-31T01:15:39.000Z
+2026-10-30 18:20:31,Disney California Adventure,Cars Land,,Radiator Springs Racers Single Rider,0,True,2026-10-31T01:15:39.000Z
+2026-10-30 18:20:31,Disney California Adventure,Grizzly Peak,,Grizzly River Run,5,True,2026-10-31T01:15:39.000Z
+2026-10-30 18:20:31,Disney California Adventure,Grizzly Peak,,Redwood Creek Challenge Trail,5,True,2026-10-31T01:15:39.000Z
+2026-10-30 18:20:31,Disney California Adventure,Grizzly Peak,,Soarin’ Across America,45,True,2026-10-31T01:15:39.000Z
+2026-10-30 18:20:31,Disney California Adventure,Hollywood Land,,Animation Academy,0,True,2026-10-31T01:15:39.000Z
+2026-10-30 18:20:31,Disney California Adventure,Hollywood Land,,Mickey's PhilharMagic,10,True,2026-10-31T01:15:39.000Z
+2026-10-30 18:20:31,Disney California Adventure,Hollywood Land,,"Monsters, Inc. Mike & Sulley to the Rescue!",45,True,2026-10-31T01:15:39.000Z
+2026-10-30 18:20:31,Disney California Adventure,Hollywood Land,,Sorcerer's Workshop,0,True,2026-10-31T01:15:39.000Z
+2026-10-30 18:20:31,Disney California Adventure,Hollywood Land,,Turtle Talk with Crush,0,True,2026-10-31T01:15:39.000Z
+2026-10-30 18:20:31,Disney California Adventure,Pacific Wharf,,The Bakery Tour,0,False,2026-10-31T01:15:39.000Z
+2026-10-30 18:20:31,Disney California Adventure,Paradise Gardens Park,,Golden Zephyr,5,True,2026-10-31T01:15:39.000Z
+2026-10-30 18:20:31,Disney California Adventure,Paradise Gardens Park,,Goofy's Sky School,40,True,2026-10-31T01:15:39.000Z
+2026-10-30 18:20:31,Disney California Adventure,Paradise Gardens Park,,Silly Symphony Swings,10,True,2026-10-31T01:15:39.000Z
+2026-10-30 18:20:31,Disney California Adventure,Paradise Gardens Park,,Silly Symphony Swings Single Rider,0,True,2026-10-31T01:15:39.000Z
+2026-10-30 18:20:31,Disney California Adventure,Paradise Gardens Park,,The Little Mermaid - Ariel's Undersea Adventure,15,True,2026-10-31T01:15:39.000Z
+2026-10-30 18:20:31,Disney California Adventure,Paradise Gardens Park,,World of Color – ONE,0,True,2026-10-31T01:15:39.000Z
+2026-10-30 18:20:31,Disney California Adventure,Pixar Pier,,Games of Pixar Pier,0,True,2026-10-31T01:15:39.000Z
+2026-10-30 18:20:31,Disney California Adventure,Pixar Pier,,Incredicoaster,35,True,2026-10-31T01:15:39.000Z
+2026-10-30 18:20:31,Disney California Adventure,Pixar Pier,,Incredicoaster Single Rider,0,True,2026-10-31T01:15:39.000Z
+2026-10-30 18:20:31,Disney California Adventure,Pixar Pier,,Inside Out Emotional Whirlwind,25,True,2026-10-31T01:15:39.000Z
+2026-10-30 18:20:31,Disney California Adventure,Pixar Pier,,Jessie's Critter Carousel,5,True,2026-10-31T01:15:39.000Z
+2026-10-30 18:20:31,Disney California Adventure,Pixar Pier,,Jumpin' Jellyfish,10,True,2026-10-31T01:15:39.000Z
+2026-10-30 18:20:31,Disney California Adventure,Pixar Pier,,Pixar Pal-A-Round - Swinging,30,True,2026-10-31T01:15:39.000Z
+2026-10-30 18:20:31,Disney California Adventure,Pixar Pier,,Pixar Pal-A-Round – Non-Swinging,20,True,2026-10-31T01:15:39.000Z
+2026-10-30 18:20:31,Disney California Adventure,Pixar Pier,,Toy Story Midway Mania!,35,True,2026-10-31T01:15:39.000Z
+2026-10-30 18:20:31,Disney California Adventure,Halloween,,Guardians of the Galaxy - Monsters After Dark,100,True,2026-10-31T01:15:39.000Z
+2026-10-30 18:20:31,Disney California Adventure,Halloween,,Mater's Graveyard JamBOOree,30,True,2026-10-31T01:15:39.000Z
+2026-10-30 18:20:31,Disney California Adventure,Halloween,,Villains Grove at Oogie Boogie Bash,0,False,2026-10-31T01:15:39.000Z
+2026-10-30 18:20:31,Universal Studios Hollywood,Jurassic World,,DinoPlay,0,False,2026-10-30T16:11:34.000Z
+2026-10-30 18:20:31,Universal Studios Hollywood,Jurassic World,,Jurassic World - The Ride,0,False,2026-10-31T01:16:36.000Z
+2026-10-30 18:20:31,Universal Studios Hollywood,Lower Lot,,Revenge of the Mummy – The Ride,0,False,2026-10-31T01:16:36.000Z
+2026-10-30 18:20:31,Universal Studios Hollywood,Minion Land,,Despicable Me Minion Mayhem,0,False,2026-10-31T01:16:36.000Z
+2026-10-30 18:20:31,Universal Studios Hollywood,Minion Land,,Silly Swirly,0,False,2026-10-31T01:16:36.000Z
+2026-10-30 18:20:31,Universal Studios Hollywood,Minion Land,,The Secret Life of Pets: Off the Leash,0,False,2026-10-31T01:16:36.000Z
+2026-10-30 18:20:31,Universal Studios Hollywood,Production Plaza,,Kung Fu Panda Adventure,0,False,2026-10-31T01:16:36.000Z
+2026-10-30 18:20:31,Universal Studios Hollywood,"Springfield, U.S.A.",,The Simpsons Ride™,0,False,2026-10-31T01:16:36.000Z
+2026-10-30 18:20:31,Universal Studios Hollywood,SUPER NINTENDO WORLD,,Bowser Jr. Challenge,0,False,2026-10-31T01:16:36.000Z
+2026-10-30 18:20:31,Universal Studios Hollywood,SUPER NINTENDO WORLD,,Mario Kart™: Bowser’s Challenge,0,False,2026-10-31T01:16:36.000Z
+2026-10-30 18:20:31,Universal Studios Hollywood,The Wizarding World of Harry Potter,,Flight of the Hippogriff™,0,False,2026-10-31T01:16:36.000Z
+2026-10-30 18:20:31,Universal Studios Hollywood,The Wizarding World of Harry Potter,,Harry Potter and the Forbidden Journey™,0,False,2026-10-31T01:16:36.000Z
+2026-10-30 18:20:31,Universal Studios Hollywood,The Wizarding World of Harry Potter,,Ollivanders™,0,False,2026-10-31T01:16:36.000Z
+2026-10-30 18:20:31,Universal Studios Hollywood,TRANSFORMERS Metrobase,,TRANSFORMERS™: The Ride-3D,0,False,2026-10-31T01:16:36.000Z
+2026-10-30 18:20:31,Universal Studios Hollywood,Upper Lot,,Fast & Furious: Hollywood Drift,0,False,2026-10-31T01:16:36.000Z
+2026-10-30 18:20:31,Universal Studios Hollywood,Upper Lot,,Studio Tour,0,False,2026-10-31T01:16:36.000Z
+2026-10-30 18:20:31,Universal Studios Hollywood,Halloween,,Dead Deader Deadest,0,False,2026-10-31T01:16:36.000Z
+2026-10-30 18:20:31,Universal Studios Hollywood,Halloween,,Evil Dead Burn,5,True,2026-10-31T01:16:36.000Z
+2026-10-30 18:20:31,Universal Studios Hollywood,Halloween,,Hellraiser,0,False,2026-10-31T01:16:36.000Z
+2026-10-30 18:20:31,Universal Studios Hollywood,Halloween,,Killceañera: Music by SLASH,0,False,2026-10-31T01:16:36.000Z
+2026-10-30 18:20:31,Universal Studios Hollywood,Halloween,,Killer Klowns from Outer Space,25,True,2026-10-31T01:16:36.000Z
+2026-10-30 18:20:31,Universal Studios Hollywood,Halloween,,Ozzy Osbourne: Prince of Darkness,40,True,2026-10-31T01:16:36.000Z
+2026-10-30 18:20:31,Universal Studios Hollywood,Halloween,,Sinners,25,True,2026-10-31T01:16:36.000Z
+2026-10-30 18:20:31,Universal Studios Hollywood,Halloween,,Stranger Things 5,10,True,2026-10-31T01:16:36.000Z
+2026-10-30 18:20:31,Universal Studios Hollywood,Halloween,,Terror Tram starring Art the Clown,15,True,2026-10-31T01:16:36.000Z
+2026-10-30 18:20:31,Legoland California,Castle Hill,,Dragon Coaster,0,False,2026-10-31T01:19:12.000Z
+2026-10-30 18:20:31,Legoland California,Castle Hill,,LEGO® City: Deep Sea Adventure,0,False,2026-10-31T01:19:12.000Z
+2026-10-30 18:20:31,Legoland California,Castle Hill,,Royal Joust,0,False,2026-10-31T01:19:12.000Z
+2026-10-30 18:20:31,Legoland California,Dino Valley,,Coastersaurus,0,False,2026-10-31T01:19:12.000Z
+2026-10-30 18:20:31,Legoland California,Dino Valley,,DUPLO® Little Dino Trail,0,False,2026-10-31T01:19:12.000Z
+2026-10-30 18:20:31,Legoland California,Dino Valley,,Explorer River Quest,0,False,2026-10-31T01:19:12.000Z
+2026-10-30 18:20:31,Legoland California,Fun Town,,Driving School,0,False,2026-10-31T01:19:12.000Z
+2026-10-30 18:20:31,Legoland California,Fun Town,,Junior Driving School,0,False,2026-10-31T01:19:12.000Z
+2026-10-30 18:20:31,Legoland California,Fun Town,,Kid Power Tower,0,False,2026-10-31T01:19:12.000Z
+2026-10-30 18:20:31,Legoland California,Fun Town,,LEGOLAND® Express,0,False,2026-10-31T01:19:12.000Z
+2026-10-30 18:20:31,Legoland California,Fun Town,,Skipper School,0,False,2026-10-31T01:19:12.000Z
+2026-10-30 18:20:31,Legoland California,Imagination Zone,,BIONICLE® Blaster,0,False,2026-10-31T01:19:12.000Z
+2026-10-30 18:20:31,Legoland California,Imagination Zone,,LEGO® Technic Coaster,0,False,2026-10-31T01:19:12.000Z
+2026-10-30 18:20:31,Legoland California,Land of Adventure,,Beetle Bounce,0,False,2026-10-31T01:19:12.000Z
+2026-10-30 18:20:31,Legoland California,Land of Adventure,,Cargo Ace,0,False,2026-10-31T01:19:12.000Z
+2026-10-30 18:20:31,Legoland California,Land of Adventure,,Dune Raiders,0,False,2026-10-31T01:19:12.000Z
+2026-10-30 18:20:31,Legoland California,Land of Adventure,,Lost Kingdom Adventure,0,False,2026-10-31T01:19:12.000Z
+2026-10-30 18:20:31,Legoland California,LEGO® Galaxy,,DUPLO Launch & Land,0,False,2026-10-31T01:19:12.000Z
+2026-10-30 18:20:31,Legoland California,LEGO® Galaxy,,G-Force Test Facility,0,False,2026-10-31T01:19:12.000Z
+2026-10-30 18:20:31,Legoland California,LEGO® Galaxy,,Galacticoaster,0,False,2026-10-31T01:19:12.000Z
+2026-10-30 18:20:31,Legoland California,LEGO® NINJAGO® WORLD,,LEGO® NINJAGO® The Ride,0,False,2026-10-31T01:19:12.000Z
+2026-10-30 18:20:31,Legoland California,Miniland USA,,Coast Cruise,0,False,2026-10-31T01:19:12.000Z
+2026-10-30 18:20:31,Legoland California,Pirate Shores,,Captain Cranky's Challenge,0,False,2026-10-31T01:19:12.000Z
+2026-10-30 18:20:31,Legoland California,Pirate Shores,,Pirate Reef,0,False,2026-10-31T01:19:12.000Z
+2026-10-30 18:20:31,Legoland California,THE LEGO® MOVIE™ WORLD,,Emmet's Flying Adventure Ride,0,False,2026-10-31T01:19:12.000Z
+2026-10-30 18:20:31,Legoland California,THE LEGO® MOVIE™ WORLD,,Queen Watevra’s Carousel,0,False,2026-10-31T01:19:12.000Z
+2026-10-30 18:20:31,Legoland California,THE LEGO® MOVIE™ WORLD,,Unikitty's Disco Drop,0,False,2026-10-31T01:19:12.000Z
